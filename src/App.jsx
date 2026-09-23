@@ -1015,12 +1015,13 @@ function AdminDashboard({ orders, onUpdateStatus, onDeleteOrder, onAddSampleOrde
 // ==============================================================================
 // 5. CREATOR STUDIO (AREA PRIVATA CREATORE)
 // ==============================================================================
-function CreatorStudio({ config, onSaveConfig, onResetToDefault, t, lang }) {
+function CreatorStudio({ config, onSaveConfig, onResetToDefault, onSetLang, t, lang }) {
   const [activeTab, setActiveTab] = useState("branding");
   
   // Localized values for current language or fallback
   const [form, setForm] = useState(() => ({
     businessName: config.businessName || "Luxe Studio",
+    defaultLanguage: config.defaultLanguage || lang || "it",
     category: getLocalized(config.category, lang),
     tagline: getLocalized(config.tagline, lang),
     rating: config.rating || 4.95,
@@ -1044,6 +1045,7 @@ function CreatorStudio({ config, onSaveConfig, onResetToDefault, t, lang }) {
   useEffect(() => {
     setForm(prev => ({
       ...prev,
+      defaultLanguage: config.defaultLanguage || lang,
       category: getLocalized(config.category, lang),
       tagline: getLocalized(config.tagline, lang),
       currency: getLocalized(config.currency, lang) || (lang === 'uk' ? 'грн' : '€'),
@@ -1087,6 +1089,7 @@ function CreatorStudio({ config, onSaveConfig, onResetToDefault, t, lang }) {
     const updated = {
       ...config,
       ...form,
+      defaultLanguage: form.defaultLanguage || lang,
       // If user typed string in form, preserve or wrap
       category: typeof config.category === 'object' ? { ...config.category, [lang]: form.category } : form.category,
       tagline: typeof config.tagline === 'object' ? { ...config.tagline, [lang]: form.tagline } : form.tagline,
@@ -1250,6 +1253,66 @@ function CreatorStudio({ config, onSaveConfig, onResetToDefault, t, lang }) {
       {/* Tab: Branding */}
       {activeTab === "branding" && (
         <div className="bg-white dark:bg-slate-850 p-6 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 space-y-5">
+          
+          {/* Dedicated Creator-Only Language Controller */}
+          <div className="bg-gradient-to-r from-indigo-50/70 to-purple-50/70 dark:from-indigo-950/40 dark:to-purple-950/40 p-5 rounded-2xl border border-indigo-200/80 dark:border-indigo-800/60 mb-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+              <div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-base">🌍</span>
+                  <h4 className="text-xs font-black uppercase tracking-wider text-indigo-950 dark:text-indigo-200">
+                    {t.appLanguageTitle}
+                  </h4>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary text-white shadow-sm">
+                    🔒 Solo Creatore
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                  {t.appLanguageDesc}
+                </p>
+              </div>
+              <span className="text-xs font-mono font-bold text-slate-400">
+                Attiva: <strong className="text-primary font-black">{(form.defaultLanguage || lang).toUpperCase()}</strong>
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              {[
+                { id: "it", label: "Italiano", flag: "🇮🇹", sub: "Mercato Italia & Svizzera" },
+                { id: "en", label: "English", flag: "🇬🇧", sub: "International & Global" },
+                { id: "uk", label: "Українська", flag: "🇺🇦", sub: "Український бізнес" },
+              ].map((item) => {
+                const isSelected = (form.defaultLanguage || lang) === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => {
+                      setForm(prev => ({ ...prev, defaultLanguage: item.id }));
+                      onSetLang && onSetLang(item.id);
+                    }}
+                    className={`p-3 rounded-2xl border text-left transition flex items-center space-x-3 active:scale-95 ${
+                      isSelected
+                        ? "bg-white dark:bg-slate-900 border-primary ring-2 ring-primary/30 shadow-md shadow-primary/10"
+                        : "bg-white/80 dark:bg-slate-900/60 border-slate-200 dark:border-slate-800 hover:border-primary/40"
+                    }`}
+                  >
+                    <span className="text-2xl">{item.flag}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <span className={`text-xs font-bold ${isSelected ? "text-primary" : "text-slate-800 dark:text-slate-200"}`}>
+                          {item.label}
+                        </span>
+                        {isSelected && <span className="text-primary text-xs font-black">✓</span>}
+                      </div>
+                      <span className="text-[10px] text-slate-400 block truncate">{item.sub}</span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500">{t.tabBranding}</h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1896,6 +1959,12 @@ export default function MainApp() {
 
   const handleSaveConfig = (newCfg) => {
     setCfg(newCfg);
+    if (newCfg.defaultLanguage) {
+      setLang(newCfg.defaultLanguage);
+      try {
+        localStorage.setItem("businesskit_lang", newCfg.defaultLanguage);
+      } catch (e) {}
+    }
     try {
       localStorage.setItem("businesskit_custom_config", JSON.stringify(newCfg));
     } catch (e) {}
@@ -2005,39 +2074,15 @@ export default function MainApp() {
             </button>
           </div>
 
-          {/* Right Controls: 3-Language Selector & Presets */}
+          {/* Right Controls: White-Label Preset Switcher (Language is ONLY managed in Creator Area) */}
           <div className="flex items-center space-x-2">
-            
-            <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-0.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold">
-              <button
-                onClick={() => handleSetLang("it")}
-                className={`px-2 py-1 rounded-lg transition ${lang === "it" ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm" : "text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"}`}
-                title="Italiano"
-              >
-                🇮🇹 IT
-              </button>
-              <button
-                onClick={() => handleSetLang("en")}
-                className={`px-2 py-1 rounded-lg transition ${lang === "en" ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm" : "text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"}`}
-                title="English"
-              >
-                🇬🇧 EN
-              </button>
-              <button
-                onClick={() => handleSetLang("uk")}
-                className={`px-2 py-1 rounded-lg transition ${lang === "uk" ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm" : "text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"}`}
-                title="Українська"
-              >
-                🇺🇦 UK
-              </button>
-            </div>
-
             <button
               onClick={() => setWlOpen(true)}
-              className="p-2 sm:px-3 sm:py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition"
+              className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition flex items-center space-x-1.5"
               title={t.whiteLabelPresets}
             >
               <span>🎨</span>
+              <span className="hidden sm:inline">{t.whiteLabelPresets}</span>
             </button>
           </div>
 
@@ -2075,6 +2120,7 @@ export default function MainApp() {
             config={cfg}
             onSaveConfig={handleSaveConfig}
             onResetToDefault={handleResetToDefault}
+            onSetLang={handleSetLang}
             t={t}
             lang={lang}
           />

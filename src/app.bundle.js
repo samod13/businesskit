@@ -899,6 +899,7 @@ function CreatorStudio({
   config,
   onSaveConfig,
   onResetToDefault,
+  onSetLang,
   t,
   lang
 }) {
@@ -907,6 +908,7 @@ function CreatorStudio({
   // Localized values for current language or fallback
   const [form, setForm] = useState(() => ({
     businessName: config.businessName || "Luxe Studio",
+    defaultLanguage: config.defaultLanguage || lang || "it",
     category: getLocalized(config.category, lang),
     tagline: getLocalized(config.tagline, lang),
     rating: config.rating || 4.95,
@@ -930,6 +932,7 @@ function CreatorStudio({
   useEffect(() => {
     setForm(prev => ({
       ...prev,
+      defaultLanguage: config.defaultLanguage || lang,
       category: getLocalized(config.category, lang),
       tagline: getLocalized(config.tagline, lang),
       currency: getLocalized(config.currency, lang) || (lang === 'uk' ? 'грн' : '€'),
@@ -986,6 +989,7 @@ function CreatorStudio({
     const updated = {
       ...config,
       ...form,
+      defaultLanguage: form.defaultLanguage || lang,
       // If user typed string in form, preserve or wrap
       category: typeof config.category === 'object' ? {
         ...config.category,
@@ -1160,7 +1164,68 @@ function CreatorStudio({
     className: `px-4 py-2.5 rounded-2xl transition flex items-center space-x-1.5 whitespace-nowrap ${activeTab === tab.id ? "bg-primary text-white shadow-md shadow-primary/20" : "bg-white dark:bg-slate-850 text-slate-600 dark:text-slate-300 hover:bg-slate-100"}`
   }, /*#__PURE__*/React.createElement("span", null, tab.icon), /*#__PURE__*/React.createElement("span", null, tab.label)))), activeTab === "branding" && /*#__PURE__*/React.createElement("div", {
     className: "bg-white dark:bg-slate-850 p-6 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 space-y-5"
-  }, /*#__PURE__*/React.createElement("h3", {
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "bg-gradient-to-r from-indigo-50/70 to-purple-50/70 dark:from-indigo-950/40 dark:to-purple-950/40 p-5 rounded-2xl border border-indigo-200/80 dark:border-indigo-800/60 mb-5"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center space-x-2"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-base"
+  }, "\uD83C\uDF0D"), /*#__PURE__*/React.createElement("h4", {
+    className: "text-xs font-black uppercase tracking-wider text-indigo-950 dark:text-indigo-200"
+  }, t.appLanguageTitle), /*#__PURE__*/React.createElement("span", {
+    className: "text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary text-white shadow-sm"
+  }, "\uD83D\uDD12 Solo Creatore")), /*#__PURE__*/React.createElement("p", {
+    className: "text-[11px] text-slate-500 dark:text-slate-400 mt-1"
+  }, t.appLanguageDesc)), /*#__PURE__*/React.createElement("span", {
+    className: "text-xs font-mono font-bold text-slate-400"
+  }, "Attiva: ", /*#__PURE__*/React.createElement("strong", {
+    className: "text-primary font-black"
+  }, (form.defaultLanguage || lang).toUpperCase()))), /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-1 sm:grid-cols-3 gap-2.5"
+  }, [{
+    id: "it",
+    label: "Italiano",
+    flag: "🇮🇹",
+    sub: "Mercato Italia & Svizzera"
+  }, {
+    id: "en",
+    label: "English",
+    flag: "🇬🇧",
+    sub: "International & Global"
+  }, {
+    id: "uk",
+    label: "Українська",
+    flag: "🇺🇦",
+    sub: "Український бізнес"
+  }].map(item => {
+    const isSelected = (form.defaultLanguage || lang) === item.id;
+    return /*#__PURE__*/React.createElement("button", {
+      key: item.id,
+      type: "button",
+      onClick: () => {
+        setForm(prev => ({
+          ...prev,
+          defaultLanguage: item.id
+        }));
+        onSetLang && onSetLang(item.id);
+      },
+      className: `p-3 rounded-2xl border text-left transition flex items-center space-x-3 active:scale-95 ${isSelected ? "bg-white dark:bg-slate-900 border-primary ring-2 ring-primary/30 shadow-md shadow-primary/10" : "bg-white/80 dark:bg-slate-900/60 border-slate-200 dark:border-slate-800 hover:border-primary/40"}`
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "text-2xl"
+    }, item.flag), /*#__PURE__*/React.createElement("div", {
+      className: "flex-1 min-w-0"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "flex items-center justify-between"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: `text-xs font-bold ${isSelected ? "text-primary" : "text-slate-800 dark:text-slate-200"}`
+    }, item.label), isSelected && /*#__PURE__*/React.createElement("span", {
+      className: "text-primary text-xs font-black"
+    }, "\u2713")), /*#__PURE__*/React.createElement("span", {
+      className: "text-[10px] text-slate-400 block truncate"
+    }, item.sub)));
+  }))), /*#__PURE__*/React.createElement("h3", {
     className: "text-sm font-bold uppercase tracking-wider text-slate-500"
   }, t.tabBranding), /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-1 md:grid-cols-2 gap-4"
@@ -1782,6 +1847,12 @@ export default function MainApp() {
   }, [cfg]);
   const handleSaveConfig = newCfg => {
     setCfg(newCfg);
+    if (newCfg.defaultLanguage) {
+      setLang(newCfg.defaultLanguage);
+      try {
+        localStorage.setItem("businesskit_lang", newCfg.defaultLanguage);
+      } catch (e) {}
+    }
     try {
       localStorage.setItem("businesskit_custom_config", JSON.stringify(newCfg));
     } catch (e) {}
@@ -1867,25 +1938,13 @@ export default function MainApp() {
     className: "hidden md:inline"
   }, t.creatorStudio))), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center space-x-2"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center bg-slate-100 dark:bg-slate-800 p-0.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold"
   }, /*#__PURE__*/React.createElement("button", {
-    onClick: () => handleSetLang("it"),
-    className: `px-2 py-1 rounded-lg transition ${lang === "it" ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm" : "text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"}`,
-    title: "Italiano"
-  }, "\uD83C\uDDEE\uD83C\uDDF9 IT"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => handleSetLang("en"),
-    className: `px-2 py-1 rounded-lg transition ${lang === "en" ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm" : "text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"}`,
-    title: "English"
-  }, "\uD83C\uDDEC\uD83C\uDDE7 EN"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => handleSetLang("uk"),
-    className: `px-2 py-1 rounded-lg transition ${lang === "uk" ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm" : "text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"}`,
-    title: "\u0423\u043A\u0440\u0430\u0457\u043D\u0441\u044C\u043A\u0430"
-  }, "\uD83C\uDDFA\uD83C\uDDE6 UK")), /*#__PURE__*/React.createElement("button", {
     onClick: () => setWlOpen(true),
-    className: "p-2 sm:px-3 sm:py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition",
+    className: "px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition flex items-center space-x-1.5",
     title: t.whiteLabelPresets
-  }, /*#__PURE__*/React.createElement("span", null, "\uD83C\uDFA8"))))), /*#__PURE__*/React.createElement("main", {
+  }, /*#__PURE__*/React.createElement("span", null, "\uD83C\uDFA8"), /*#__PURE__*/React.createElement("span", {
+    className: "hidden sm:inline"
+  }, t.whiteLabelPresets))))), /*#__PURE__*/React.createElement("main", {
     className: "flex-1"
   }, tab === "customer" && /*#__PURE__*/React.createElement(PhoneMockup, {
     isFullWidth: fullWidth,
@@ -1920,6 +1979,7 @@ export default function MainApp() {
     config: cfg,
     onSaveConfig: handleSaveConfig,
     onResetToDefault: handleResetToDefault,
+    onSetLang: handleSetLang,
     t: t,
     lang: lang
   })), /*#__PURE__*/React.createElement(TelegramAlert, {
@@ -1943,6 +2003,9 @@ export default function MainApp() {
     lang: lang
   }));
 }
+
+// Export default for Vite / modular loaders
+export { MainApp };
 
 // Mount to root
 const rootEl = document.getElementById('root');

@@ -7,6 +7,7 @@
 export const businessConfig = {
   // 1. BUSINESS PROFILE (MULTILINGUAL)
   businessName: "Luxe Studio",
+  defaultLanguage: "it",
   category: {
     it: "Salone di Bellezza & SPA",
     en: "Beauty Salon & Luxury SPA",

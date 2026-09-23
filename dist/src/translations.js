@@ -136,6 +136,9 @@ export const translations = {
     tabServices: "Catalogo Servizi",
     tabExportCode: "Esporta / Salva Codice",
 
+    appLanguageTitle: "Lingua dell'Applicazione per il Cliente",
+    appLanguageDesc: "Scegli in quale lingua verrà visualizzata l'app per questo cliente (Widget Cliente e CRM)",
+
     fieldBusinessName: "Nome dell'Attività",
     fieldCategory: "Categoria di Business",
     fieldTagline: "Slogan o Promessa",
@@ -318,6 +321,9 @@ export const translations = {
     tabServices: "Services Catalog",
     tabExportCode: "Export / Save Code",
 
+    appLanguageTitle: "Client Application Language",
+    appLanguageDesc: "Choose which language the app will be displayed in for this client (Customer Widget & CRM)",
+
     fieldBusinessName: "Business Name",
     fieldCategory: "Business Category",
     fieldTagline: "Tagline / Value Proposition",
@@ -499,6 +505,9 @@ export const translations = {
     tabColorsStyle: "Кольори & Стилі",
     tabServices: "Каталог послуг",
     tabExportCode: "Експорт / Зберегти код",
+
+    appLanguageTitle: "Мова додатку для клієнта",
+    appLanguageDesc: "Оберіть, якою мовою відображатиметься продукт для цього клієнта (Віджет та CRM)",
 
     fieldBusinessName: "Назва бізнесу (businessName)",
     fieldCategory: "Категорія (category)",
