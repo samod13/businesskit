@@ -19,6 +19,30 @@
 
 ---
 
+## ☁️ Як опублікувати на Vercel (Deployment in 1 minuto)
+
+Проєкт уже повністю сконфігуровано для Vercel через файл [`vercel.json`](file:///Users/mac/Desktop/B2B/vercel.json) та Git-репозиторій.
+
+### Спосіб 1: Через GitHub (Найпростіший)
+1. Створіть новий репозиторій на [GitHub](https://github.com/new) (наприклад, `businesskit-mvp`).
+2. У терміналі в папці проєкту виконайте:
+   ```bash
+   git remote add origin https://github.com/<ваш-username>/businesskit-mvp.git
+   git push -u origin main
+   ```
+3. Перейдіть на [vercel.com/new](https://vercel.com/new), виберіть ваш репозиторій та натисніть **Deploy**.
+4. За 30 секунд додаток буде доступний в інтернеті за посиланням `https://businesskit-mvp.vercel.app`!
+
+### Спосіб 2: Через Vercel CLI
+```bash
+./deploy-vercel.sh
+# або
+npx vercel
+```
+
+
+---
+
 ## ⏱️ Як адаптувати додаток під нового клієнта за 2 хвилини
 
 Увесь брендинг, стиль, кольори та послуги зосереджені в одному файлі:  
