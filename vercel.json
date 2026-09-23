@@ -1,9 +1,8 @@
 {
   "version": 2,
   "name": "businesskit-mvp",
-  "framework": null,
-  "buildCommand": null,
-  "outputDirectory": ".",
+  "buildCommand": "mkdir -p dist && cp -r index.html favicon.svg apple-touch-icon.png src dist/",
+  "outputDirectory": "dist",
   "cleanUrls": true,
   "headers": [
     {

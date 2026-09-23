@@ -6,7 +6,7 @@
   "description": "White-Label customizable web booking application and owner CRM dashboard for local businesses",
   "scripts": {
     "dev": "vite",
-    "build": "echo 'Static site ready'",
+    "build": "mkdir -p dist && cp -r index.html favicon.svg apple-touch-icon.png src dist/",
     "preview": "vite preview",
     "serve": "python3 -m http.server 3000"
   },
