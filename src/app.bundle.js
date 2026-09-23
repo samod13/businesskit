@@ -1,4 +1,4 @@
-import { businessConfig, businessPresets } from './config.js';
+import { businessConfig, businessPresets, getLocalized } from './config.js';
 import { translations } from './translations.js';
 const _global = typeof window !== 'undefined' ? window : globalThis;
 const React = _global.React;
@@ -41,7 +41,155 @@ function getNextDays(locale = 'it') {
   return days;
 }
 
-// --- 1. PhoneMockup Component ---
+// Initial demo orders for first-time visitors
+function getInitialOrders(lang = 'it') {
+  if (lang === 'uk') {
+    return [{
+      id: "BK-7891",
+      clientName: "Олена Коваленко",
+      clientPhone: "+380 67 111 22 33",
+      serviceId: "srv-2",
+      serviceName: "Комплексний преміум-манікюр",
+      price: 750,
+      currency: "грн",
+      duration: "60 хв",
+      date: "Завтра (24 вер)",
+      time: "14:00",
+      comment: "Прошу нагадати за годину через SMS",
+      status: "new",
+      createdAt: new Date(Date.now() - 15 * 60000).toISOString(),
+      businessName: "Luxe Studio"
+    }, {
+      id: "BK-7890",
+      clientName: "Максим Шевченко",
+      clientPhone: "+380 50 222 33 44",
+      serviceId: "srv-1",
+      serviceName: "Стрижка та авторське укладання",
+      price: 650,
+      currency: "грн",
+      duration: "45 хв",
+      date: "Сьогодні (23 вер)",
+      time: "17:30",
+      comment: "",
+      status: "confirmed",
+      createdAt: new Date(Date.now() - 120 * 60000).toISOString(),
+      businessName: "Luxe Studio"
+    }, {
+      id: "BK-7889",
+      clientName: "Ірина Мельник",
+      clientPhone: "+380 93 444 55 66",
+      serviceId: "srv-3",
+      serviceName: "SPA-догляд та масаж обличчя",
+      price: 1200,
+      currency: "грн",
+      duration: "60 хв",
+      date: "23 вер",
+      time: "11:00",
+      comment: "Чутлива шкіра",
+      status: "completed",
+      createdAt: new Date(Date.now() - 360 * 60000).toISOString(),
+      businessName: "Luxe Studio"
+    }];
+  } else if (lang === 'en') {
+    return [{
+      id: "BK-7891",
+      clientName: "Emily Watson",
+      clientPhone: "+1 202 555 0192",
+      serviceId: "srv-2",
+      serviceName: "Deluxe Spa Manicure with Gel Polish",
+      price: 40,
+      currency: "€",
+      duration: "60 min",
+      date: "Tomorrow (Sep 24)",
+      time: "14:00",
+      comment: "Please confirm via SMS",
+      status: "new",
+      createdAt: new Date(Date.now() - 15 * 60000).toISOString(),
+      businessName: "Luxe Studio"
+    }, {
+      id: "BK-7890",
+      clientName: "David Miller",
+      clientPhone: "+1 415 555 2671",
+      serviceId: "srv-1",
+      serviceName: "Signature Haircut & Blowout",
+      price: 45,
+      currency: "€",
+      duration: "45 min",
+      date: "Today (Sep 23)",
+      time: "17:30",
+      comment: "",
+      status: "confirmed",
+      createdAt: new Date(Date.now() - 120 * 60000).toISOString(),
+      businessName: "Luxe Studio"
+    }, {
+      id: "BK-7889",
+      clientName: "Sarah Davis",
+      clientPhone: "+1 312 555 8899",
+      serviceId: "srv-3",
+      serviceName: "Anti-Aging Facial with Lymphatic Massage",
+      price: 85,
+      currency: "€",
+      duration: "60 min",
+      date: "Sep 23",
+      time: "11:00",
+      comment: "Sensitive skin preference",
+      status: "completed",
+      createdAt: new Date(Date.now() - 360 * 60000).toISOString(),
+      businessName: "Luxe Studio"
+    }];
+  } else {
+    return [{
+      id: "BK-7891",
+      clientName: "Giulia Romano",
+      clientPhone: "+39 340 123 4567",
+      serviceId: "srv-2",
+      serviceName: "Manicure Spa Completa con Semipermanente",
+      price: 40,
+      currency: "€",
+      duration: "60 min",
+      date: "Domani (24 set)",
+      time: "14:00",
+      comment: "Richiesta conferma via WhatsApp",
+      status: "new",
+      createdAt: new Date(Date.now() - 15 * 60000).toISOString(),
+      businessName: "Luxe Studio"
+    }, {
+      id: "BK-7890",
+      clientName: "Alessandro Ferrari",
+      clientPhone: "+39 335 987 6543",
+      serviceId: "srv-1",
+      serviceName: "Taglio e Piega Stilistica",
+      price: 45,
+      currency: "€",
+      duration: "45 min",
+      date: "Oggi (23 set)",
+      time: "17:30",
+      comment: "",
+      status: "confirmed",
+      createdAt: new Date(Date.now() - 120 * 60000).toISOString(),
+      businessName: "Luxe Studio"
+    }, {
+      id: "BK-7889",
+      clientName: "Chiara Ricci",
+      clientPhone: "+39 320 444 5566",
+      serviceId: "srv-3",
+      serviceName: "Trattamento Viso Anti-Age con Massaggio Linfodrenante",
+      price: 85,
+      currency: "€",
+      duration: "60 min",
+      date: "23 set",
+      time: "11:00",
+      comment: "Pelle sensibile",
+      status: "completed",
+      createdAt: new Date(Date.now() - 360 * 60000).toISOString(),
+      businessName: "Luxe Studio"
+    }];
+  }
+}
+
+// ==============================================================================
+// 1. PHONE MOCKUP COMPONENT
+// ==============================================================================
 function PhoneMockup({
   children,
   isFullWidth,
@@ -83,6 +231,14 @@ function PhoneMockup({
   }, /*#__PURE__*/React.createElement("span", null, t.switchToDesktop))), /*#__PURE__*/React.createElement("div", {
     className: "relative w-full max-w-[395px] h-[844px] bg-slate-900 rounded-[52px] p-[10px] shadow-[0_25px_60px_-15px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.1),inset_0_0_0_2px_rgba(255,255,255,0.15)] ring-1 ring-slate-800 flex flex-col"
   }, /*#__PURE__*/React.createElement("div", {
+    className: "absolute -left-[12px] top-[115px] w-[3px] h-[26px] bg-slate-700 rounded-l-sm"
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "absolute -left-[12px] top-[155px] w-[3px] h-[48px] bg-slate-700 rounded-l-sm"
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "absolute -left-[12px] top-[215px] w-[3px] h-[48px] bg-slate-700 rounded-l-sm"
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "absolute -right-[12px] top-[170px] w-[3px] h-[60px] bg-slate-700 rounded-r-sm"
+  }), /*#__PURE__*/React.createElement("div", {
     className: "relative w-full h-full bg-white dark:bg-slate-900 rounded-[44px] overflow-hidden flex flex-col"
   }, /*#__PURE__*/React.createElement("div", {
     className: "relative z-30 h-11 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md flex items-center justify-between px-7 pt-1 select-none"
@@ -105,7 +261,9 @@ function PhoneMockup({
   })))));
 }
 
-// --- 2. BookingModal Component ---
+// ==============================================================================
+// 2. BOOKING MODAL COMPONENT
+// ==============================================================================
 function BookingModal({
   service,
   config,
@@ -121,20 +279,21 @@ function BookingModal({
   const [selectedDay, setSelectedDay] = useState(days[1] || days[0]);
   const [selectedTime, setSelectedTime] = useState("14:00");
   const [clientName, setClientName] = useState("");
-  const [clientPhone, setClientPhone] = useState("+39 ");
+  const [clientPhone, setClientPhone] = useState(lang === 'uk' ? '+380 ' : lang === 'en' ? '+1 ' : '+39 ');
   const [comment, setComment] = useState("");
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   useEffect(() => {
     if (lang === 'uk' && clientPhone === '+39 ') setClientPhone('+380 ');
     if (lang === 'en' && (clientPhone === '+39 ' || clientPhone === '+380 ')) setClientPhone('+1 ');
+    if (lang === 'it' && (clientPhone === '+380 ' || clientPhone === '+1 ')) setClientPhone('+39 ');
   }, [lang]);
   const handleSubmit = e => {
     e.preventDefault();
     const errs = {};
     if (!clientName.trim()) errs.clientName = t.errName;
     const digits = clientPhone.replace(/\D/g, '');
-    if (digits.length < 8) {
+    if (digits.length < 7) {
       errs.clientPhone = t.errPhone;
     }
     if (!selectedTime) errs.selectedTime = t.errTime;
@@ -144,242 +303,135 @@ function BookingModal({
     }
     setIsSubmitting(true);
     setTimeout(() => {
+      const localizedServiceName = getLocalized(service.name, lang);
+      const localizedCategory = getLocalized(service.category, lang);
+      const localizedPrice = getLocalized(service.price, lang);
+      const localizedCurrency = getLocalized(config.currency, lang) || (lang === 'uk' ? 'грн' : '€');
+      const localizedDuration = getLocalized(service.duration, lang);
       const newOrder = {
         id: "BK-" + Math.floor(1000 + Math.random() * 9000),
         clientName: clientName.trim(),
         clientPhone: clientPhone.trim(),
         serviceId: service.id,
-        serviceName: service.name,
-        price: service.price,
-        currency: config.currency || "€",
-        duration: service.duration,
-        date: `${selectedDay.label} (${selectedDay.sub})`,
-        rawDate: selectedDay.dateStr,
+        serviceName: localizedServiceName,
+        category: localizedCategory,
+        price: localizedPrice,
+        currency: localizedCurrency,
+        duration: localizedDuration,
+        date: selectedDay.label + " (" + selectedDay.sub + ")",
         time: selectedTime,
         comment: comment.trim(),
         status: "new",
         createdAt: new Date().toISOString(),
         businessName: config.businessName
       };
-      onSubmitBooking(newOrder);
       setIsSubmitting(false);
+      onSubmitBooking(newOrder);
       onClose();
-    }, 350);
+    }, 450);
   };
+  const localizedSrvName = getLocalized(service.name, lang);
+  const localizedSrvCategory = getLocalized(service.category, lang);
+  const localizedSrvPrice = getLocalized(service.price, lang);
+  const localizedSrvDuration = getLocalized(service.duration, lang);
+  const localizedCurrency = getLocalized(config.currency, lang) || (lang === 'uk' ? 'грн' : '€');
   return /*#__PURE__*/React.createElement("div", {
-    className: "fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/60 backdrop-blur-sm animate-fade-in font-sans"
+    className: "fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-sm animate-fade-in font-sans"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "w-full sm:max-w-lg bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col max-h-[90vh] animate-slide-up",
+    className: "w-full max-w-lg bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col max-h-[92vh] animate-slide-up sm:animate-scale-up",
     onClick: e => e.stopPropagation()
   }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
-    className: "text-[11px] font-bold uppercase tracking-wider text-slate-400"
-  }, t.quickBookingTitle), /*#__PURE__*/React.createElement("h3", {
-    className: "text-base font-bold text-slate-900 dark:text-white leading-tight"
+    className: "flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-850"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h3", {
+    className: "text-base font-black text-slate-900 dark:text-white"
+  }, t.quickBookingTitle), /*#__PURE__*/React.createElement("p", {
+    className: "text-xs text-slate-500 dark:text-slate-400"
   }, config.businessName)), /*#__PURE__*/React.createElement("button", {
     onClick: onClose,
-    className: "w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+    className: "w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-800 transition"
   }, "\u2715")), /*#__PURE__*/React.createElement("div", {
-    className: "p-6 overflow-y-auto space-y-5"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "p-4 rounded-2xl bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800/60 dark:to-slate-800 border border-slate-200/80 dark:border-slate-700/60 flex items-start justify-between"
+    className: "px-6 py-3 bg-primary/5 dark:bg-primary/10 border-b border-primary/10 flex items-center justify-between"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
-    className: "text-[10px] font-bold text-primary px-2 py-0.5 rounded-full bg-primary/10 inline-block mb-1"
-  }, service.category || t.serviceLabel), /*#__PURE__*/React.createElement("h4", {
-    className: "font-bold text-slate-900 dark:text-white text-sm sm:text-base leading-snug"
-  }, service.name), /*#__PURE__*/React.createElement("div", {
-    className: "mt-1 text-xs text-slate-500 dark:text-slate-400 font-medium"
-  }, "\u23F1\uFE0F ", service.duration)), /*#__PURE__*/React.createElement("div", {
-    className: "text-right whitespace-nowrap pl-2"
+    className: "text-[10px] font-bold uppercase tracking-wider text-primary"
+  }, localizedSrvCategory), /*#__PURE__*/React.createElement("h4", {
+    className: "text-sm font-bold text-slate-900 dark:text-white"
+  }, localizedSrvName)), /*#__PURE__*/React.createElement("div", {
+    className: "text-right"
   }, /*#__PURE__*/React.createElement("span", {
-    className: "text-[10px] text-slate-400 block"
-  }, t.thPrice), /*#__PURE__*/React.createElement("span", {
-    className: "text-base sm:text-lg font-black text-slate-900 dark:text-white"
-  }, service.price, " ", config.currency || "€"))), /*#__PURE__*/React.createElement("form", {
+    className: "text-base font-black text-primary"
+  }, localizedSrvPrice, " ", localizedCurrency), /*#__PURE__*/React.createElement("span", {
+    className: "text-[11px] block text-slate-400"
+  }, "\u23F1\uFE0F ", localizedSrvDuration))), /*#__PURE__*/React.createElement("form", {
     onSubmit: handleSubmit,
-    className: "space-y-4"
+    className: "p-6 overflow-y-auto space-y-5 flex-1"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
-    className: "block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-2"
+    className: "block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2"
   }, t.step1Date), /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-5 gap-1.5 sm:gap-2"
-  }, days.map((d, i) => {
-    const isSel = selectedDay.dateStr === d.dateStr;
+    className: "grid grid-cols-5 gap-2"
+  }, days.map((day, idx) => {
+    const isSelected = selectedDay.dateStr === day.dateStr;
     return /*#__PURE__*/React.createElement("button", {
-      key: i,
+      key: idx,
       type: "button",
-      onClick: () => setSelectedDay(d),
-      className: `p-2 rounded-xl border text-center transition ${isSel ? "border-primary bg-primary text-white shadow-md shadow-primary/25 scale-[1.02]" : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300 text-slate-700 dark:text-slate-200"}`
+      onClick: () => setSelectedDay(day),
+      className: `p-2.5 rounded-2xl flex flex-col items-center justify-center transition border ${isSelected ? "bg-primary text-white border-primary shadow-md shadow-primary/25 scale-105" : "bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-primary/50"}`
     }, /*#__PURE__*/React.createElement("span", {
-      className: "text-[10px] font-semibold block uppercase"
-    }, d.label), /*#__PURE__*/React.createElement("span", {
-      className: `text-xs ${isSel ? "text-white/90 font-bold" : "text-slate-400 font-medium"}`
-    }, d.sub));
-  }))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    className: "flex justify-between items-center mb-2"
-  }, /*#__PURE__*/React.createElement("label", {
-    className: "text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300"
-  }, t.step2Time), /*#__PURE__*/React.createElement("span", {
-    className: "text-[11px] text-slate-400"
-  }, t.freeSlots)), /*#__PURE__*/React.createElement("div", {
+      className: "text-[11px] font-bold leading-tight"
+    }, day.label), /*#__PURE__*/React.createElement("span", {
+      className: "text-[10px] opacity-80 mt-0.5"
+    }, day.sub));
+  }))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2"
+  }, t.step2Time), /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-4 gap-2"
-  }, timeSlots.map(slot => {
-    const isSel = selectedTime === slot;
+  }, timeSlots.map(time => {
+    const isSelected = selectedTime === time;
     return /*#__PURE__*/React.createElement("button", {
-      key: slot,
+      key: time,
       type: "button",
-      onClick: () => {
-        setSelectedTime(slot);
-        if (errors.selectedTime) setErrors(prev => ({
-          ...prev,
-          selectedTime: null
-        }));
-      },
-      className: `py-2 px-1 text-xs font-bold rounded-xl border transition ${isSel ? "border-primary bg-primary text-white shadow-sm" : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300 text-slate-700 dark:text-slate-200"}`
-    }, slot);
-  })), errors.selectedTime && /*#__PURE__*/React.createElement("p", {
-    className: "text-xs text-rose-500 font-medium mt-1"
-  }, errors.selectedTime)), /*#__PURE__*/React.createElement("div", {
-    className: "space-y-3 pt-2 border-t border-slate-100 dark:border-slate-800"
+      onClick: () => setSelectedTime(time),
+      className: `py-2 px-1 text-xs font-bold rounded-xl transition border text-center ${isSelected ? "bg-primary text-white border-primary shadow-sm shadow-primary/25" : "bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-slate-300"}`
+    }, time);
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "space-y-3 pt-1"
   }, /*#__PURE__*/React.createElement("label", {
-    className: "block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300"
+    className: "block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider"
   }, t.step3Contact), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("input", {
     type: "text",
     value: clientName,
-    onChange: e => {
-      setClientName(e.target.value);
-      if (errors.clientName) setErrors(prev => ({
-        ...prev,
-        clientName: null
-      }));
-    },
+    onChange: e => setClientName(e.target.value),
     placeholder: t.namePlaceholder,
-    className: `w-full px-3.5 py-2.5 text-sm rounded-xl border bg-slate-50/50 dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 ${errors.clientName ? "border-rose-400" : "border-slate-200 dark:border-slate-700 focus:border-primary"}`
+    className: `w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border ${errors.clientName ? "border-rose-500 ring-1 ring-rose-500" : "border-slate-200 dark:border-slate-700"} text-xs font-medium focus:outline-none focus:border-primary`
   }), errors.clientName && /*#__PURE__*/React.createElement("p", {
-    className: "text-xs text-rose-500 font-medium mt-1"
+    className: "text-[11px] text-rose-500 mt-1 font-medium"
   }, errors.clientName)), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("input", {
     type: "tel",
     value: clientPhone,
-    onChange: e => {
-      setClientPhone(e.target.value);
-      if (errors.clientPhone) setErrors(prev => ({
-        ...prev,
-        clientPhone: null
-      }));
-    },
+    onChange: e => setClientPhone(e.target.value),
     placeholder: t.phonePlaceholder,
-    className: `w-full px-3.5 py-2.5 text-sm rounded-xl border bg-slate-50/50 dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 ${errors.clientPhone ? "border-rose-400" : "border-slate-200 dark:border-slate-700 focus:border-primary"}`
+    className: `w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border ${errors.clientPhone ? "border-rose-500 ring-1 ring-rose-500" : "border-slate-200 dark:border-slate-700"} text-xs font-medium focus:outline-none focus:border-primary`
   }), errors.clientPhone && /*#__PURE__*/React.createElement("p", {
-    className: "text-xs text-rose-500 font-medium mt-1"
-  }, errors.clientPhone)), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("input", {
-    type: "text",
+    className: "text-[11px] text-rose-500 mt-1 font-medium"
+  }, errors.clientPhone)), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("textarea", {
+    rows: 2,
     value: comment,
     onChange: e => setComment(e.target.value),
     placeholder: t.commentPlaceholder,
-    className: "w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-primary"
-  }))), /*#__PURE__*/React.createElement("button", {
+    className: "w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-medium focus:outline-none focus:border-primary resize-none"
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "pt-2"
+  }, /*#__PURE__*/React.createElement("button", {
     type: "submit",
     disabled: isSubmitting,
-    className: "w-full py-3.5 px-4 rounded-2xl bg-primary hover:opacity-95 text-white font-bold text-sm tracking-wide shadow-lg shadow-primary/25 transition active:scale-[0.99] flex items-center justify-center space-x-2 mt-4"
-  }, isSubmitting ? /*#__PURE__*/React.createElement("span", null, t.submittingBtn) : /*#__PURE__*/React.createElement("span", null, "\u2728 ", t.confirmBookingBtn, " (", service.price, " ", config.currency || "€", ")")), /*#__PURE__*/React.createElement("p", {
-    className: "text-[11px] text-center text-slate-400"
+    className: "w-full py-3.5 rounded-2xl bg-primary hover:opacity-95 text-white font-extrabold text-sm shadow-lg shadow-primary/30 transition active:scale-95 disabled:opacity-50"
+  }, isSubmitting ? t.submittingBtn : t.confirmBookingBtn), /*#__PURE__*/React.createElement("p", {
+    className: "text-center text-[11px] text-slate-400 mt-2 font-medium"
   }, "\uD83D\uDD12 ", t.instantConfirmNotice)))));
 }
 
-// --- 3. TelegramAlert Component ---
-function TelegramAlert({
-  order,
-  onClose,
-  onOpenAdmin,
-  t
-}) {
-  if (!order) return null;
-  useEffect(() => {
-    try {
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      if (AudioContext) {
-        const ctx = new AudioContext();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.frequency.setValueAtTime(659.25, ctx.currentTime);
-        gain.gain.setValueAtTime(0.1, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start();
-        osc.stop(ctx.currentTime + 0.35);
-      }
-    } catch (e) {}
-    console.log(`%c ✈️ [Telegram Bot Alert] %c ${order.clientName} (${order.clientPhone}) | ${order.serviceName} - ${order.price} ${order.currency}`, 'background: #0088cc; color: #fff; font-weight: bold; border-radius: 4px; padding: 4px 8px;', 'color: #0088cc; font-weight: bold;');
-  }, [order]);
-  return /*#__PURE__*/React.createElement("div", {
-    className: "fixed inset-x-4 top-4 md:top-6 md:right-6 md:left-auto md:max-w-md z-50 animate-bounce-in font-sans"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "bg-slate-900/95 text-white backdrop-blur-xl border border-sky-500/40 rounded-3xl shadow-2xl p-5 ring-1 ring-white/10"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center justify-between border-b border-slate-800 pb-3 mb-3"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center space-x-2.5"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "w-8 h-8 rounded-full bg-gradient-to-tr from-sky-500 to-blue-600 flex items-center justify-center text-white shadow-md font-bold text-sm"
-  }, "\u2708\uFE0F"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center space-x-1.5"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "text-xs font-bold text-sky-400"
-  }, t.telegramBotTitle), /*#__PURE__*/React.createElement("span", {
-    className: "text-[10px] bg-sky-500/20 text-sky-300 px-1.5 py-0.5 rounded-full font-mono font-medium"
-  }, "LIVE")), /*#__PURE__*/React.createElement("p", {
-    className: "text-[11px] text-slate-400"
-  }, t.telegramBotChannel))), /*#__PURE__*/React.createElement("button", {
-    onClick: onClose,
-    className: "text-slate-400 hover:text-white p-1"
-  }, "\u2715")), /*#__PURE__*/React.createElement("div", {
-    className: "bg-slate-950/70 rounded-2xl p-3.5 border border-slate-800 font-mono text-xs space-y-1.5"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "text-emerald-400 font-semibold font-sans"
-  }, "\u2728 ", t.telegramNewLead), /*#__PURE__*/React.createElement("div", {
-    className: "h-px bg-slate-800 my-1"
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-[75px_1fr] gap-x-2 text-[11px]"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "text-slate-400"
-  }, t.telegramClient), /*#__PURE__*/React.createElement("span", {
-    className: "text-white font-medium font-sans"
-  }, order.clientName), /*#__PURE__*/React.createElement("span", {
-    className: "text-slate-400"
-  }, t.telegramPhone), /*#__PURE__*/React.createElement("span", {
-    className: "text-sky-400 font-sans"
-  }, order.clientPhone), /*#__PURE__*/React.createElement("span", {
-    className: "text-slate-400"
-  }, t.telegramService), /*#__PURE__*/React.createElement("span", {
-    className: "text-white font-sans"
-  }, order.serviceName), /*#__PURE__*/React.createElement("span", {
-    className: "text-slate-400"
-  }, t.telegramTime), /*#__PURE__*/React.createElement("span", {
-    className: "text-amber-300 font-sans"
-  }, order.date, ", ", order.time), /*#__PURE__*/React.createElement("span", {
-    className: "text-slate-400"
-  }, t.telegramTotal), /*#__PURE__*/React.createElement("span", {
-    className: "text-emerald-400 font-bold font-sans"
-  }, order.price, " ", order.currency || "€"), order.comment && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("span", {
-    className: "text-slate-400"
-  }, t.telegramNotes), /*#__PURE__*/React.createElement("span", {
-    className: "text-slate-300 italic font-sans"
-  }, order.comment)))), /*#__PURE__*/React.createElement("div", {
-    className: "mt-3.5 flex items-center gap-2"
-  }, /*#__PURE__*/React.createElement("button", {
-    onClick: () => {
-      onOpenAdmin();
-      onClose();
-    },
-    className: "flex-1 bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold py-2 px-3 rounded-xl text-xs transition active:scale-95 text-center shadow-md shadow-sky-500/20"
-  }, t.telegramOpenAdmin), /*#__PURE__*/React.createElement("button", {
-    onClick: onClose,
-    className: "px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-medium"
-  }, t.telegramDismiss))));
-}
-
-// --- 4. CustomerApp Component ---
+// ==============================================================================
+// 3. CUSTOMER APP COMPONENT
+// ==============================================================================
 function CustomerApp({
   config,
   onBookService,
@@ -391,28 +443,41 @@ function CustomerApp({
   const [selectedCat, setSelectedCat] = useState("all");
   const [bookingSrv, setBookingSrv] = useState(null);
   const [showSuccess, setShowSuccess] = useState(false);
+
+  // Reset category filter when switching languages so categories always match
+  useEffect(() => {
+    setSelectedCat("all");
+  }, [lang]);
   const categories = useMemo(() => {
-    const c = [{
+    const list = [{
       id: "all",
-      label: t.all
+      label: t.all || "All"
     }];
-    if (config.services) {
+    const seen = new Set();
+    if (config.services && Array.isArray(config.services)) {
       config.services.forEach(s => {
-        if (s.category && !c.some(item => item.id === s.category)) {
-          c.push({
-            id: s.category,
-            label: s.category
+        const cat = getLocalized(s.category, lang);
+        if (cat && !seen.has(cat)) {
+          seen.add(cat);
+          list.push({
+            id: cat,
+            label: cat
           });
         }
       });
     }
-    return c;
-  }, [config.services, t.all]);
+    return list;
+  }, [config.services, lang, t.all]);
   const filtered = useMemo(() => {
     if (!config.services) return [];
     if (selectedCat === "all") return config.services;
-    return config.services.filter(s => s.category === selectedCat);
-  }, [config.services, selectedCat]);
+    return config.services.filter(s => getLocalized(s.category, lang) === selectedCat);
+  }, [config.services, selectedCat, lang]);
+  const localizedBusinessCategory = getLocalized(config.category, lang);
+  const localizedTagline = getLocalized(config.tagline, lang);
+  const localizedAddress = getLocalized(config.contact?.address, lang);
+  const localizedWorkingHours = getLocalized(config.contact?.workingHours, lang);
+  const localizedCurrency = getLocalized(config.currency, lang) || (lang === 'uk' ? 'грн' : '€');
   return /*#__PURE__*/React.createElement("div", {
     className: "min-h-full flex flex-col bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 font-sans"
   }, /*#__PURE__*/React.createElement("div", {
@@ -420,7 +485,7 @@ function CustomerApp({
   }, /*#__PURE__*/React.createElement("div", {
     className: "h-44 sm:h-52 w-full relative overflow-hidden bg-slate-800"
   }, /*#__PURE__*/React.createElement("img", {
-    src: config.coverUrl,
+    src: config.coverUrl || "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=1200&q=80",
     alt: config.businessName,
     className: "w-full h-full object-cover brightness-90 hover:scale-105 transition-transform duration-700"
   }), /*#__PURE__*/React.createElement("div", {
@@ -440,21 +505,21 @@ function CustomerApp({
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center space-x-3.5"
   }, /*#__PURE__*/React.createElement("img", {
-    src: config.logoUrl,
+    src: config.logoUrl || "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=250&q=80",
     alt: config.businessName,
     className: "w-14 h-14 rounded-2xl object-cover border-2 border-white dark:border-slate-800 shadow-md ring-2 ring-primary/20"
   }), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h1", {
     className: "text-lg font-black text-slate-900 dark:text-white leading-tight"
   }, config.businessName), /*#__PURE__*/React.createElement("p", {
     className: "text-xs font-semibold text-primary mt-0.5"
-  }, config.category), /*#__PURE__*/React.createElement("p", {
+  }, localizedBusinessCategory), /*#__PURE__*/React.createElement("p", {
     className: "text-[11px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-1"
-  }, "\uD83D\uDCCD ", config.contact?.address))), config.tagline && /*#__PURE__*/React.createElement("p", {
+  }, "\uD83D\uDCCD ", localizedAddress))), localizedTagline && /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-slate-600 dark:text-slate-300 mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800 italic"
-  }, "\"", config.tagline, "\""), /*#__PURE__*/React.createElement("div", {
+  }, "\"", localizedTagline, "\""), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-2 mt-3 pt-1 overflow-x-auto scrollbar-none text-[11px]"
-  }, /*#__PURE__*/React.createElement("a", {
-    href: `tel:${config.contact?.phone}`,
+  }, config.contact?.phone && /*#__PURE__*/React.createElement("a", {
+    href: `tel:${config.contact.phone}`,
     className: "px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-primary/10 hover:text-primary transition font-medium whitespace-nowrap"
   }, "\uD83D\uDCDE ", t.call), config.contact?.instagram && /*#__PURE__*/React.createElement("a", {
     href: `https://instagram.com/${config.contact.instagram.replace('@', '')}`,
@@ -463,7 +528,7 @@ function CustomerApp({
     className: "px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-pink-500/10 hover:text-pink-500 transition font-medium whitespace-nowrap"
   }, "\uD83D\uDCF8 Instagram"), /*#__PURE__*/React.createElement("span", {
     className: "px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-medium whitespace-nowrap"
-  }, "\uD83D\uDD52 ", config.contact?.workingHours))))), /*#__PURE__*/React.createElement("div", {
+  }, "\uD83D\uDD52 ", localizedWorkingHours))))), /*#__PURE__*/React.createElement("div", {
     className: "px-4 mt-5"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center justify-between mb-2"
@@ -479,35 +544,42 @@ function CustomerApp({
     className: `px-3.5 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap ${selectedCat === cat.id ? "bg-primary text-white shadow-md shadow-primary/25 scale-[1.02]" : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-slate-300"}`
   }, cat.label)))), /*#__PURE__*/React.createElement("div", {
     className: "px-4 mt-3 space-y-3 flex-1 pb-20"
-  }, filtered.map(srv => /*#__PURE__*/React.createElement("div", {
-    key: srv.id,
-    className: "bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200/80 dark:border-slate-700/80 transition hover:shadow-md flex flex-col justify-between"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-start justify-between gap-3"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center space-x-2"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
-  }, srv.category), srv.popular && /*#__PURE__*/React.createElement("span", {
-    className: "text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 border border-amber-500/20"
-  }, "\uD83D\uDD25 ", t.popularHit)), /*#__PURE__*/React.createElement("h3", {
-    className: "text-sm font-bold text-slate-900 dark:text-white mt-1.5"
-  }, srv.name)), /*#__PURE__*/React.createElement("div", {
-    className: "text-right whitespace-nowrap pl-2"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "text-base font-black text-slate-900 dark:text-white"
-  }, srv.price, " ", config.currency || "€"), /*#__PURE__*/React.createElement("span", {
-    className: "text-[11px] text-slate-400"
-  }, "\u23F1\uFE0F ", srv.duration))), srv.description && /*#__PURE__*/React.createElement("p", {
-    className: "text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed"
-  }, srv.description)), /*#__PURE__*/React.createElement("div", {
-    className: "mt-3.5 pt-3 border-t border-slate-100 dark:border-slate-700/50 flex items-center justify-between"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "text-[11px] text-emerald-600 dark:text-emerald-400 font-medium"
-  }, "\u25CF ", t.freeSlotsTomorrow), /*#__PURE__*/React.createElement("button", {
-    onClick: () => setBookingSrv(srv),
-    className: "px-3.5 py-1.5 rounded-xl bg-primary text-white font-bold text-xs shadow-sm shadow-primary/20 transition active:scale-95"
-  }, t.bookNow))))), /*#__PURE__*/React.createElement(BookingModal, {
+  }, filtered.map(srv => {
+    const srvName = getLocalized(srv.name, lang);
+    const srvCategory = getLocalized(srv.category, lang);
+    const srvPrice = getLocalized(srv.price, lang);
+    const srvDuration = getLocalized(srv.duration, lang);
+    const srvDescription = getLocalized(srv.description, lang);
+    return /*#__PURE__*/React.createElement("div", {
+      key: srv.id,
+      className: "bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200/80 dark:border-slate-700/80 transition hover:shadow-md flex flex-col justify-between"
+    }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      className: "flex items-start justify-between gap-3"
+    }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      className: "flex items-center space-x-2"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
+    }, srvCategory), srv.popular && /*#__PURE__*/React.createElement("span", {
+      className: "text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 border border-amber-500/20"
+    }, "\uD83D\uDD25 ", t.popularHit)), /*#__PURE__*/React.createElement("h3", {
+      className: "text-sm font-bold text-slate-900 dark:text-white mt-1.5"
+    }, srvName)), /*#__PURE__*/React.createElement("div", {
+      className: "text-right whitespace-nowrap pl-2"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "text-base font-black text-slate-900 dark:text-white"
+    }, srvPrice, " ", localizedCurrency), /*#__PURE__*/React.createElement("span", {
+      className: "text-[11px] text-slate-400"
+    }, "\u23F1\uFE0F ", srvDuration))), srvDescription && /*#__PURE__*/React.createElement("p", {
+      className: "text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed"
+    }, srvDescription)), /*#__PURE__*/React.createElement("div", {
+      className: "mt-3.5 pt-3 border-t border-slate-100 dark:border-slate-700/50 flex items-center justify-between"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "text-[11px] text-emerald-600 dark:text-emerald-400 font-medium"
+    }, "\u25CF ", t.freeSlotsTomorrow), /*#__PURE__*/React.createElement("button", {
+      onClick: () => setBookingSrv(srv),
+      className: "px-3.5 py-1.5 rounded-xl bg-primary text-white font-bold text-xs shadow-sm shadow-primary/20 transition active:scale-95"
+    }, t.bookNow)));
+  })), /*#__PURE__*/React.createElement(BookingModal, {
     service: bookingSrv,
     config: config,
     isOpen: !!bookingSrv,
@@ -575,7 +647,9 @@ function CustomerApp({
   }, t.doneBtn))));
 }
 
-// --- 5. AdminDashboard Component ---
+// ==============================================================================
+// 4. ADMIN DASHBOARD COMPONENT
+// ==============================================================================
 function AdminDashboard({
   orders,
   onUpdateStatus,
@@ -583,7 +657,8 @@ function AdminDashboard({
   onAddSampleOrder,
   onResetOrders,
   config,
-  t
+  t,
+  lang
 }) {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
@@ -597,6 +672,8 @@ function AdminDashboard({
   const newCount = orders.filter(o => o.status === 'new').length;
   const confirmedCount = orders.filter(o => o.status === 'confirmed').length;
   const completedCount = orders.filter(o => o.status === 'completed').length;
+  const avgCheck = orders.length > 0 ? Math.round(totalRevenue / (orders.length - orders.filter(o => o.status === 'cancelled').length || 1)) : 0;
+  const localizedCurrency = getLocalized(config.currency, lang) || (lang === 'uk' ? 'грн' : '€');
   const handleExportCSV = () => {
     const headers = [t.thIdTime, t.thClientPhone, t.thService, t.thDate, t.thPrice, t.thStatus, t.telegramNotes];
     const rows = orders.map(o => [o.id, `"${o.clientName} (${o.clientPhone})"`, `"${o.serviceName}"`, `"${o.date} ${o.time}"`, `${o.price} ${o.currency}`, o.status, `"${o.comment || ''}"`]);
@@ -604,15 +681,22 @@ function AdminDashboard({
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `leads_${Date.now()}.csv`);
+    link.setAttribute("download", `orders_${config.businessName.toLowerCase().replace(/\s+/g, '_')}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
+  const getStatusLabel = st => {
+    if (st === 'new') return t.statusNew;
+    if (st === 'confirmed') return t.statusConfirmed;
+    if (st === 'completed') return t.statusCompleted;
+    if (st === 'cancelled') return t.statusCancelled;
+    return st;
+  };
   return /*#__PURE__*/React.createElement("div", {
     className: "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fade-in font-sans"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700"
+    className: "flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-slate-850 p-6 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center space-x-4"
   }, /*#__PURE__*/React.createElement("div", {
@@ -622,61 +706,72 @@ function AdminDashboard({
   }, /*#__PURE__*/React.createElement("h1", {
     className: "text-xl sm:text-2xl font-black text-slate-900 dark:text-white"
   }, t.adminTitle, ": ", config.businessName), /*#__PURE__*/React.createElement("span", {
-    className: "text-xs bg-emerald-500/10 text-emerald-600 font-semibold px-2 py-0.5 rounded-full border border-emerald-500/20"
+    className: "text-xs bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold px-2 py-0.5 rounded-full border border-emerald-500/20"
   }, "Live CRM")), /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-slate-500 dark:text-slate-400 mt-0.5"
   }, t.adminSubtitle))), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-2 flex-wrap"
   }, /*#__PURE__*/React.createElement("button", {
     onClick: onAddSampleOrder,
-    className: "px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold text-xs transition active:scale-95 flex items-center space-x-1"
+    className: "px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition flex items-center space-x-1.5 active:scale-95"
   }, /*#__PURE__*/React.createElement("span", null, t.addTestLead)), /*#__PURE__*/React.createElement("button", {
     onClick: handleExportCSV,
-    className: "px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 font-bold text-xs transition active:scale-95 flex items-center space-x-1",
-    title: "Download CSV"
+    className: "px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition flex items-center space-x-1.5 active:scale-95"
   }, /*#__PURE__*/React.createElement("span", null, t.exportCsv)), /*#__PURE__*/React.createElement("button", {
     onClick: onResetOrders,
-    className: "px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-rose-600 text-xs font-semibold transition active:scale-95"
-  }, t.resetDb))), /*#__PURE__*/React.createElement("div", {
+    className: "px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-rose-50 hover:text-rose-600 text-slate-400 text-xs font-semibold transition active:scale-95"
+  }, /*#__PURE__*/React.createElement("span", null, t.resetDb)))), /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "text-xs font-bold uppercase text-slate-400"
+    className: "bg-white dark:bg-slate-850 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "text-slate-400 text-xs font-bold uppercase tracking-wider"
   }, t.totalLeads), /*#__PURE__*/React.createElement("div", {
-    className: "mt-2 text-3xl font-black text-slate-900 dark:text-white"
-  }, orders.length), /*#__PURE__*/React.createElement("div", {
-    className: "text-[11px] text-amber-500 mt-1 font-medium"
+    className: "mt-3 flex items-baseline space-x-2"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-3xl font-black text-slate-900 dark:text-white"
+  }, orders.length), /*#__PURE__*/React.createElement("span", {
+    className: "text-xs text-emerald-500 font-bold"
+  }, "+", orders.slice(0, 3).length, " ", t.todayLeads)), /*#__PURE__*/React.createElement("div", {
+    className: "mt-2 text-[11px] text-slate-400"
   }, newCount, " ", t.pendingReview)), /*#__PURE__*/React.createElement("div", {
-    className: "bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "text-xs font-bold uppercase text-slate-400"
+    className: "bg-white dark:bg-slate-850 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "text-slate-400 text-xs font-bold uppercase tracking-wider"
   }, t.expectedRevenue), /*#__PURE__*/React.createElement("div", {
-    className: "mt-2 text-3xl font-black text-emerald-600"
-  }, totalRevenue.toLocaleString(), " ", config.currency || "€"), /*#__PURE__*/React.createElement("div", {
-    className: "text-[11px] text-slate-400 mt-1"
+    className: "mt-3 flex items-baseline space-x-2"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-3xl font-black text-slate-900 dark:text-white"
+  }, totalRevenue), /*#__PURE__*/React.createElement("span", {
+    className: "text-sm font-bold text-slate-400"
+  }, localizedCurrency)), /*#__PURE__*/React.createElement("div", {
+    className: "mt-2 text-[11px] text-slate-400"
   }, t.activeBookings)), /*#__PURE__*/React.createElement("div", {
-    className: "bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "text-xs font-bold uppercase text-slate-400"
+    className: "bg-white dark:bg-slate-850 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "text-slate-400 text-xs font-bold uppercase tracking-wider"
   }, t.averageCheck), /*#__PURE__*/React.createElement("div", {
-    className: "mt-2 text-3xl font-black text-slate-900 dark:text-white"
-  }, orders.length ? Math.round(totalRevenue / (orders.filter(o => o.status !== 'cancelled').length || 1)) : 0, " ", config.currency || "€"), /*#__PURE__*/React.createElement("div", {
-    className: "text-[11px] text-slate-400 mt-1"
+    className: "mt-3 flex items-baseline space-x-2"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-3xl font-black text-slate-900 dark:text-white"
+  }, avgCheck), /*#__PURE__*/React.createElement("span", {
+    className: "text-sm font-bold text-slate-400"
+  }, localizedCurrency)), /*#__PURE__*/React.createElement("div", {
+    className: "mt-2 text-[11px] text-slate-400"
   }, t.perClient)), /*#__PURE__*/React.createElement("div", {
-    className: "bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "text-xs font-bold uppercase text-slate-400"
+    className: "bg-white dark:bg-slate-850 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "text-slate-400 text-xs font-bold uppercase tracking-wider"
   }, t.statusFunnel), /*#__PURE__*/React.createElement("div", {
-    className: "mt-2 flex items-center justify-between text-xs font-semibold"
+    className: "mt-3 flex items-center justify-between text-xs"
   }, /*#__PURE__*/React.createElement("span", {
-    className: "text-amber-500"
+    className: "text-amber-500 font-bold"
   }, "\uD83D\uDFE1 ", newCount), /*#__PURE__*/React.createElement("span", {
-    className: "text-sky-500"
+    className: "text-sky-500 font-bold"
   }, "\uD83D\uDD35 ", confirmedCount), /*#__PURE__*/React.createElement("span", {
-    className: "text-emerald-500"
+    className: "text-emerald-500 font-bold"
   }, "\uD83D\uDFE2 ", completedCount)), /*#__PURE__*/React.createElement("div", {
-    className: "w-full bg-slate-100 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden mt-3 flex"
+    className: "w-full bg-slate-100 dark:bg-slate-700 h-2 rounded-full overflow-hidden flex mt-3"
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       width: `${newCount / (orders.length || 1) * 100}%`
@@ -686,110 +781,96 @@ function AdminDashboard({
     style: {
       width: `${confirmedCount / (orders.length || 1) * 100}%`
     },
-    className: "bg-sky-500"
+    className: "bg-sky-400"
   }), /*#__PURE__*/React.createElement("div", {
     style: {
       width: `${completedCount / (orders.length || 1) * 100}%`
     },
-    className: "bg-emerald-500"
+    className: "bg-emerald-400"
   })))), /*#__PURE__*/React.createElement("div", {
-    className: "flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700"
+    className: "bg-white dark:bg-slate-850 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "p-4 sm:p-6 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3"
   }, /*#__PURE__*/React.createElement("div", {
     className: "relative flex-1 max-w-md"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "absolute left-3 top-2.5 text-slate-400 text-xs"
-  }, "\uD83D\uDD0D"), /*#__PURE__*/React.createElement("input", {
+  }, /*#__PURE__*/React.createElement("input", {
     type: "text",
     value: search,
     onChange: e => setSearch(e.target.value),
     placeholder: t.searchPlaceholder,
-    className: "w-full pl-8 pr-4 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white"
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center space-x-1 overflow-x-auto scrollbar-none"
-  }, [{
-    id: "all",
-    label: t.filterAll
-  }, {
-    id: "new",
-    label: t.filterNew
-  }, {
-    id: "confirmed",
-    label: t.filterConfirmed
-  }, {
-    id: "completed",
-    label: t.filterCompleted
-  }, {
-    id: "cancelled",
-    label: t.filterCancelled
-  }].map(f => /*#__PURE__*/React.createElement("button", {
-    key: f.id,
-    onClick: () => setFilter(f.id),
-    className: `px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${filter === f.id ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-sm" : "bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300"}`
-  }, f.label)))), /*#__PURE__*/React.createElement("div", {
-    className: "bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden"
-  }, /*#__PURE__*/React.createElement("div", {
+    className: "w-full pl-9 pr-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs focus:outline-none focus:border-primary"
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "absolute left-3 top-2.5 text-xs text-slate-400"
+  }, "\uD83D\uDD0D")), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-1.5 overflow-x-auto scrollbar-none text-xs font-semibold"
+  }, ['all', 'new', 'confirmed', 'completed', 'cancelled'].map(st => /*#__PURE__*/React.createElement("button", {
+    key: st,
+    onClick: () => setFilter(st),
+    className: `px-3 py-1.5 rounded-xl transition ${filter === st ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900" : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200"}`
+  }, st === 'all' && t.filterAll, st === 'new' && t.filterNew, st === 'confirmed' && t.filterConfirmed, st === 'completed' && t.filterCompleted, st === 'cancelled' && t.filterCancelled)))), /*#__PURE__*/React.createElement("div", {
     className: "overflow-x-auto"
   }, /*#__PURE__*/React.createElement("table", {
-    className: "w-full text-left border-collapse text-xs"
-  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", {
-    className: "border-b border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/80 text-[11px] font-bold uppercase text-slate-500"
-  }, /*#__PURE__*/React.createElement("th", {
-    className: "py-3.5 px-4 sm:px-6"
+    className: "w-full text-left text-xs"
+  }, /*#__PURE__*/React.createElement("thead", {
+    className: "bg-slate-50 dark:bg-slate-800/60 text-slate-400 font-bold uppercase tracking-wider border-b border-slate-100 dark:border-slate-800"
+  }, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
+    className: "py-3 px-4"
   }, t.thIdTime), /*#__PURE__*/React.createElement("th", {
-    className: "py-3.5 px-4"
+    className: "py-3 px-4"
   }, t.thClientPhone), /*#__PURE__*/React.createElement("th", {
-    className: "py-3.5 px-4"
+    className: "py-3 px-4"
   }, t.thService), /*#__PURE__*/React.createElement("th", {
-    className: "py-3.5 px-4"
+    className: "py-3 px-4"
   }, t.thDate), /*#__PURE__*/React.createElement("th", {
-    className: "py-3.5 px-4"
+    className: "py-3 px-4"
   }, t.thPrice), /*#__PURE__*/React.createElement("th", {
-    className: "py-3.5 px-4"
+    className: "py-3 px-4"
   }, t.thStatus), /*#__PURE__*/React.createElement("th", {
-    className: "py-3.5 px-4 sm:px-6 text-right"
+    className: "py-3 px-4 text-right"
   }, t.thActions))), /*#__PURE__*/React.createElement("tbody", {
-    className: "divide-y divide-slate-100 dark:divide-slate-700/60"
-  }, filtered.map(order => /*#__PURE__*/React.createElement("tr", {
-    key: order.id,
-    className: "hover:bg-slate-50/70 dark:hover:bg-slate-750/50"
+    className: "divide-y divide-slate-100 dark:divide-slate-800 font-medium"
+  }, filtered.length === 0 ? /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", {
+    colSpan: 7,
+    className: "py-12 text-center text-slate-400"
+  }, t.noOrdersFound)) : filtered.map(o => /*#__PURE__*/React.createElement("tr", {
+    key: o.id,
+    className: "hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition"
   }, /*#__PURE__*/React.createElement("td", {
-    className: "py-4 px-4 sm:px-6 whitespace-nowrap"
+    className: "py-3.5 px-4"
   }, /*#__PURE__*/React.createElement("span", {
-    className: "font-mono font-bold bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded text-[11px] text-slate-700 dark:text-slate-300"
-  }, order.id), /*#__PURE__*/React.createElement("div", {
-    className: "text-[10px] text-slate-400 mt-1"
-  }, order.createdAt ? new Date(order.createdAt).toLocaleTimeString([], {
+    className: "font-mono font-bold text-slate-800 dark:text-slate-200"
+  }, "#", o.id), /*#__PURE__*/React.createElement("span", {
+    className: "block text-[10px] text-slate-400 mt-0.5"
+  }, new Date(o.createdAt).toLocaleTimeString([], {
     hour: '2-digit',
     minute: '2-digit'
-  }) : 'Adesso')), /*#__PURE__*/React.createElement("td", {
-    className: "py-4 px-4 whitespace-nowrap"
+  }))), /*#__PURE__*/React.createElement("td", {
+    className: "py-3.5 px-4"
   }, /*#__PURE__*/React.createElement("div", {
     className: "font-bold text-slate-900 dark:text-white"
-  }, order.clientName), /*#__PURE__*/React.createElement("a", {
-    href: `tel:${order.clientPhone}`,
-    className: "text-[11px] text-primary hover:underline font-mono"
-  }, order.clientPhone), order.comment && /*#__PURE__*/React.createElement("div", {
-    className: "text-[10px] text-slate-400 italic max-w-xs truncate"
-  }, "\"", order.comment, "\"")), /*#__PURE__*/React.createElement("td", {
-    className: "py-4 px-4"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "font-medium text-slate-800 dark:text-slate-200"
-  }, order.serviceName), /*#__PURE__*/React.createElement("span", {
-    className: "text-[10px] text-slate-400"
-  }, order.duration)), /*#__PURE__*/React.createElement("td", {
-    className: "py-4 px-4 whitespace-nowrap"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "font-bold text-slate-900 dark:text-white"
-  }, order.date), /*#__PURE__*/React.createElement("span", {
-    className: "text-[11px] text-primary font-semibold"
-  }, order.time)), /*#__PURE__*/React.createElement("td", {
-    className: "py-4 px-4 whitespace-nowrap font-black text-slate-900 dark:text-white"
-  }, order.price, " ", order.currency || "€"), /*#__PURE__*/React.createElement("td", {
-    className: "py-4 px-4 whitespace-nowrap"
+  }, o.clientName), /*#__PURE__*/React.createElement("a", {
+    href: `tel:${o.clientPhone}`,
+    className: "text-primary text-[11px] hover:underline font-mono"
+  }, o.clientPhone)), /*#__PURE__*/React.createElement("td", {
+    className: "py-3.5 px-4"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "font-semibold"
+  }, o.serviceName), o.comment && /*#__PURE__*/React.createElement("p", {
+    className: "text-[11px] text-slate-400 italic line-clamp-1"
+  }, "\"", o.comment, "\"")), /*#__PURE__*/React.createElement("td", {
+    className: "py-3.5 px-4 whitespace-nowrap"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "font-bold text-slate-800 dark:text-slate-200"
+  }, o.date), /*#__PURE__*/React.createElement("span", {
+    className: "block text-[11px] text-slate-400"
+  }, "\u23F0 ", o.time)), /*#__PURE__*/React.createElement("td", {
+    className: "py-3.5 px-4 whitespace-nowrap font-black text-slate-900 dark:text-white"
+  }, o.price, " ", o.currency), /*#__PURE__*/React.createElement("td", {
+    className: "py-3.5 px-4"
   }, /*#__PURE__*/React.createElement("select", {
-    value: order.status,
-    onChange: e => onUpdateStatus(order.id, e.target.value),
-    className: "text-xs font-bold rounded-xl px-2.5 py-1.5 border cursor-pointer bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-100"
+    value: o.status,
+    onChange: e => onUpdateStatus(o.id, e.target.value),
+    className: "px-2 py-1 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none"
   }, /*#__PURE__*/React.createElement("option", {
     value: "new"
   }, t.statusNew), /*#__PURE__*/React.createElement("option", {
@@ -799,100 +880,21 @@ function AdminDashboard({
   }, t.statusCompleted), /*#__PURE__*/React.createElement("option", {
     value: "cancelled"
   }, t.statusCancelled))), /*#__PURE__*/React.createElement("td", {
-    className: "py-4 px-4 sm:px-6 text-right whitespace-nowrap"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center justify-end space-x-1.5"
-  }, /*#__PURE__*/React.createElement("a", {
-    href: `tel:${order.clientPhone}`,
-    className: "p-1.5 text-slate-400 hover:text-emerald-500 rounded-lg hover:bg-slate-100 transition",
-    title: t.call
-  }, "\uD83D\uDCDE"), /*#__PURE__*/React.createElement("button", {
+    className: "py-3.5 px-4 text-right"
+  }, /*#__PURE__*/React.createElement("button", {
     onClick: () => {
-      if (confirm(`${t.deleteConfirm} ${order.id}?`)) onDeleteOrder(order.id);
+      if (confirm(t.deleteConfirm + ` #${o.id}?`)) {
+        onDeleteOrder(o.id);
+      }
     },
-    className: "p-1.5 text-slate-400 hover:text-rose-500 rounded-lg hover:bg-slate-100 transition",
-    title: "Delete"
-  }, "\uD83D\uDDD1\uFE0F"))))), filtered.length === 0 && /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", {
-    colSpan: "7",
-    className: "py-12 text-center text-slate-400"
-  }, t.noOrdersFound)))))));
+    className: "p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition",
+    title: t.deleteServiceBtn
+  }, "\uD83D\uDDD1\uFE0F")))))))));
 }
 
-// --- 6. WhiteLabelDemo Component ---
-function WhiteLabelDemo({
-  currentConfig,
-  onSelectPreset,
-  onCustomUpdate,
-  isOpen,
-  onClose,
-  t
-}) {
-  if (!isOpen) return null;
-  const presets = [{
-    id: "beautySalon",
-    name: "Salone di Bellezza & SPA",
-    brand: "Luxe Studio",
-    icon: "💅",
-    colors: ["#7c3aed", "#db2777"],
-    data: businessPresets.beautySalon
-  }, {
-    id: "barberShop",
-    name: "Barbershop Uomo",
-    brand: "Blade & Barber",
-    icon: "💈",
-    colors: ["#d97706", "#334155"],
-    data: businessPresets.barberShop
-  }, {
-    id: "autoDetailing",
-    name: "Detailing & Auto Spa",
-    brand: "Apex Auto Spa",
-    icon: "🚗",
-    colors: ["#0284c7", "#ef4444"],
-    data: businessPresets.autoDetailing
-  }, {
-    id: "coffeeRoastery",
-    name: "Caffetteria Artigianale",
-    brand: "Kava Craft",
-    icon: "☕",
-    colors: ["#92400e", "#ea580c"],
-    data: businessPresets.coffeeRoastery
-  }];
-  return /*#__PURE__*/React.createElement("div", {
-    className: "fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fade-in font-sans"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "w-full max-w-lg bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-6 animate-scale-up"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex justify-between items-center pb-4 border-b border-slate-100 dark:border-slate-800"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h3", {
-    className: "text-base font-black text-slate-900 dark:text-white"
-  }, t.whiteLabelPresets), /*#__PURE__*/React.createElement("p", {
-    className: "text-xs text-slate-500"
-  }, "Demo rapida delle nicchie disponibili")), /*#__PURE__*/React.createElement("button", {
-    onClick: onClose,
-    className: "text-slate-400 hover:text-white"
-  }, "\u2715")), /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-2 gap-3 my-4"
-  }, presets.map(p => /*#__PURE__*/React.createElement("button", {
-    key: p.id,
-    onClick: () => {
-      onSelectPreset(p.data);
-      onClose();
-    },
-    className: `p-3.5 rounded-2xl border text-left transition ${currentConfig.businessName === p.brand ? "border-primary bg-primary/5 ring-2 ring-primary/20" : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300"}`
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "text-2xl mb-1"
-  }, p.icon), /*#__PURE__*/React.createElement("div", {
-    className: "font-bold text-sm text-slate-900 dark:text-white"
-  }, p.brand), /*#__PURE__*/React.createElement("div", {
-    className: "text-xs text-slate-500"
-  }, p.name)))), /*#__PURE__*/React.createElement("p", {
-    className: "text-[11px] text-center text-slate-400 mt-4"
-  }, "\uD83D\uDCA1 Configurazione modificabile in: ", /*#__PURE__*/React.createElement("code", {
-    className: "text-primary font-bold"
-  }, "src/config.js"))));
-}
-
-// --- 7. CreatorStudio Component ---
+// ==============================================================================
+// 5. CREATOR STUDIO (AREA PRIVATA CREATORE)
+// ==============================================================================
 function CreatorStudio({
   config,
   onSaveConfig,
@@ -901,26 +903,43 @@ function CreatorStudio({
   lang
 }) {
   const [activeTab, setActiveTab] = useState("branding");
-  const [form, setForm] = useState({
-    businessName: config.businessName || "",
-    category: config.category || "",
-    tagline: config.tagline || "",
+
+  // Localized values for current language or fallback
+  const [form, setForm] = useState(() => ({
+    businessName: config.businessName || "Luxe Studio",
+    category: getLocalized(config.category, lang),
+    tagline: getLocalized(config.tagline, lang),
     rating: config.rating || 4.95,
-    reviewsCount: config.reviewsCount || 120,
+    reviewsCount: config.reviewsCount || 142,
     logoUrl: config.logoUrl || "",
     coverUrl: config.coverUrl || "",
     primaryColor: config.primaryColor || "#7c3aed",
     accentColor: config.accentColor || "#db2777",
-    currency: config.currency || "€",
+    currency: getLocalized(config.currency, lang) || (lang === 'uk' ? 'грн' : '€'),
     contact: {
       phone: config.contact?.phone || "",
-      address: config.contact?.address || "",
-      workingHours: config.contact?.workingHours || "",
+      address: getLocalized(config.contact?.address, lang),
+      workingHours: getLocalized(config.contact?.workingHours, lang),
       instagram: config.contact?.instagram || "",
       telegramBot: config.contact?.telegramBot || ""
     },
     services: config.services ? [...config.services] : []
-  });
+  }));
+
+  // Keep form in sync if language switches
+  useEffect(() => {
+    setForm(prev => ({
+      ...prev,
+      category: getLocalized(config.category, lang),
+      tagline: getLocalized(config.tagline, lang),
+      currency: getLocalized(config.currency, lang) || (lang === 'uk' ? 'грн' : '€'),
+      contact: {
+        ...prev.contact,
+        address: getLocalized(config.contact?.address, lang),
+        workingHours: getLocalized(config.contact?.workingHours, lang)
+      }
+    }));
+  }, [lang, config]);
   const [toastMessage, setToastMessage] = useState("");
   const [editingIndex, setEditingIndex] = useState(null);
   const [serviceModal, setServiceModal] = useState(false);
@@ -953,35 +972,148 @@ function CreatorStudio({
     name: "Coffee Warm & Orange",
     primary: "#92400e",
     accent: "#ea580c"
+  }, {
+    name: "Cyber Neon & Indigo",
+    primary: "#4f46e5",
+    accent: "#06b6d4"
   }];
   const showToast = msg => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(""), 3000);
   };
   const handleApply = () => {
-    onSaveConfig(form);
+    // Merge back: preserve multilingual objects where not overwritten
+    const updated = {
+      ...config,
+      ...form,
+      // If user typed string in form, preserve or wrap
+      category: typeof config.category === 'object' ? {
+        ...config.category,
+        [lang]: form.category
+      } : form.category,
+      tagline: typeof config.tagline === 'object' ? {
+        ...config.tagline,
+        [lang]: form.tagline
+      } : form.tagline,
+      currency: typeof config.currency === 'object' ? {
+        ...config.currency,
+        [lang]: form.currency
+      } : form.currency,
+      contact: {
+        ...config.contact,
+        ...form.contact,
+        address: typeof config.contact?.address === 'object' ? {
+          ...config.contact.address,
+          [lang]: form.contact.address
+        } : form.contact.address,
+        workingHours: typeof config.contact?.workingHours === 'object' ? {
+          ...config.contact.workingHours,
+          [lang]: form.contact.workingHours
+        } : form.contact.workingHours
+      },
+      services: form.services
+    };
+    onSaveConfig(updated);
     showToast(t.changesAppliedToast);
+  };
+  const openAddService = () => {
+    setEditingIndex(null);
+    setSrvForm({
+      id: "srv-" + Date.now(),
+      name: "",
+      category: form.services[0] ? getLocalized(form.services[0].category, lang) : "General",
+      price: 50,
+      duration: "45 min",
+      description: "",
+      popular: false
+    });
+    setServiceModal(true);
+  };
+  const openEditService = idx => {
+    setEditingIndex(idx);
+    const s = form.services[idx];
+    setSrvForm({
+      id: s.id,
+      name: getLocalized(s.name, lang),
+      category: getLocalized(s.category, lang),
+      price: getLocalized(s.price, lang),
+      duration: getLocalized(s.duration, lang),
+      description: getLocalized(s.description, lang),
+      popular: !!s.popular
+    });
+    setServiceModal(true);
   };
   const handleSaveService = e => {
     e.preventDefault();
     if (!srvForm.name.trim()) return;
     const list = [...form.services];
     if (editingIndex !== null) {
-      list[editingIndex] = srvForm;
+      const orig = list[editingIndex];
+      list[editingIndex] = {
+        ...orig,
+        name: typeof orig.name === 'object' ? {
+          ...orig.name,
+          [lang]: srvForm.name
+        } : srvForm.name,
+        category: typeof orig.category === 'object' ? {
+          ...orig.category,
+          [lang]: srvForm.category
+        } : srvForm.category,
+        price: typeof orig.price === 'object' ? {
+          ...orig.price,
+          [lang]: Number(srvForm.price)
+        } : Number(srvForm.price),
+        duration: typeof orig.duration === 'object' ? {
+          ...orig.duration,
+          [lang]: srvForm.duration
+        } : srvForm.duration,
+        description: typeof orig.description === 'object' ? {
+          ...orig.description,
+          [lang]: srvForm.description
+        } : srvForm.description,
+        popular: srvForm.popular
+      };
     } else {
-      list.push(srvForm);
+      list.push({
+        ...srvForm,
+        price: Number(srvForm.price)
+      });
     }
-    setForm({
-      ...form,
+    setForm(prev => ({
+      ...prev,
       services: list
-    });
+    }));
     setServiceModal(false);
   };
-  const generateCode = () => {
-    return `export const businessConfig = ${JSON.stringify(form, null, 2)};\n`;
+  const handleDeleteService = idx => {
+    if (confirm(t.deleteConfirm + ` ${getLocalized(form.services[idx].name, lang)}?`)) {
+      setForm(prev => ({
+        ...prev,
+        services: prev.services.filter((_, i) => i !== idx)
+      }));
+    }
+  };
+  const generateConfigJsCode = () => {
+    return `/**\n * BUSINESSKIT MVP — WHITE-LABEL CONFIG\n * Generated by Creator Studio\n */\nexport const businessConfig = ${JSON.stringify(form, null, 2)};\n`;
+  };
+  const handleCopyCode = () => {
+    navigator.clipboard?.writeText(generateConfigJsCode());
+    showToast(t.configCodeCopied);
+  };
+  const handleDownloadCode = () => {
+    const blob = new Blob([generateConfigJsCode()], {
+      type: "text/javascript"
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "config.js";
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast("config.js downloaded!");
   };
   return /*#__PURE__*/React.createElement("div", {
-    className: "max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6 font-sans animate-fade-in"
+    className: "max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6 animate-fade-in font-sans"
   }, toastMessage && /*#__PURE__*/React.createElement("div", {
     className: "fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl border border-emerald-500/40 flex items-center space-x-2 animate-bounce-in"
   }, /*#__PURE__*/React.createElement("span", {
@@ -989,50 +1121,51 @@ function CreatorStudio({
   }, "\u2713"), /*#__PURE__*/React.createElement("span", {
     className: "text-xs font-bold"
   }, toastMessage)), /*#__PURE__*/React.createElement("div", {
-    className: "bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-6 sm:p-8 rounded-3xl shadow-xl border border-indigo-500/30 relative overflow-hidden"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center space-x-4"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-400 to-amber-600 flex items-center justify-center text-slate-950 font-black text-2xl shadow-lg"
-  }, "\uD83D\uDC51"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center space-x-2"
-  }, /*#__PURE__*/React.createElement("h1", {
-    className: "text-xl sm:text-2xl font-black tracking-tight"
-  }, t.creatorStudioTitle), /*#__PURE__*/React.createElement("span", {
-    className: "text-[10px] bg-amber-400/20 text-amber-300 font-bold px-2 py-0.5 rounded-full border border-amber-400/30 uppercase"
-  }, "Master Panel")), /*#__PURE__*/React.createElement("p", {
-    className: "text-xs text-slate-300 mt-1 max-w-xl"
-  }, t.creatorStudioSubtitle))), /*#__PURE__*/React.createElement("button", {
+    className: "bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-6 sm:p-8 rounded-3xl shadow-xl border border-indigo-500/30 flex flex-col md:flex-row md:items-center justify-between gap-4"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-amber-400/20 text-amber-300 text-xs font-bold border border-amber-400/30 mb-2"
+  }, /*#__PURE__*/React.createElement("span", null, "\uD83D\uDC51"), /*#__PURE__*/React.createElement("span", null, t.creatorStudio)), /*#__PURE__*/React.createElement("h2", {
+    className: "text-xl sm:text-2xl font-black"
+  }, t.creatorStudioTitle), /*#__PURE__*/React.createElement("p", {
+    className: "text-xs text-slate-300 max-w-2xl mt-1"
+  }, t.creatorStudioSubtitle)), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-2"
+  }, /*#__PURE__*/React.createElement("button", {
     onClick: handleApply,
-    className: "px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 text-slate-950 font-black text-xs shadow-lg transition active:scale-95"
-  }, "\uD83D\uDCBE ", t.saveCreatorChangesBtn)), /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center space-x-2 mt-6 pt-4 border-t border-white/10 overflow-x-auto scrollbar-none"
+    className: "px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-black text-xs shadow-lg shadow-emerald-500/25 transition active:scale-95"
+  }, "\uD83D\uDCBE ", t.saveCreatorChangesBtn), /*#__PURE__*/React.createElement("button", {
+    onClick: onResetToDefault,
+    className: "px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition active:scale-95"
+  }, "\uD83D\uDD04"))), /*#__PURE__*/React.createElement("div", {
+    className: "flex border-b border-slate-200 dark:border-slate-800 space-x-2 overflow-x-auto pb-1 text-xs font-bold"
   }, [{
     id: "branding",
-    icon: "🏢",
-    label: t.tabBranding
+    label: t.tabBranding,
+    icon: "🏷️"
   }, {
     id: "colors",
-    icon: "🎨",
-    label: t.tabColorsStyle
+    label: t.tabColorsStyle,
+    icon: "🎨"
   }, {
     id: "services",
-    icon: "✂️",
-    label: `${t.tabServices} (${form.services.length})`
+    label: t.tabServices,
+    icon: "📋"
   }, {
     id: "export",
-    icon: "💾",
-    label: t.tabExportCode
+    label: t.tabExportCode,
+    icon: "💾"
   }].map(tab => /*#__PURE__*/React.createElement("button", {
     key: tab.id,
     onClick: () => setActiveTab(tab.id),
-    className: `px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-1.5 whitespace-nowrap ${activeTab === tab.id ? "bg-white text-slate-900 shadow-md" : "bg-white/10 text-white/80 hover:bg-white/20"}`
-  }, /*#__PURE__*/React.createElement("span", null, tab.icon), /*#__PURE__*/React.createElement("span", null, tab.label))))), activeTab === "branding" && /*#__PURE__*/React.createElement("div", {
-    className: "bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 grid grid-cols-1 md:grid-cols-2 gap-6"
+    className: `px-4 py-2.5 rounded-2xl transition flex items-center space-x-1.5 whitespace-nowrap ${activeTab === tab.id ? "bg-primary text-white shadow-md shadow-primary/20" : "bg-white dark:bg-slate-850 text-slate-600 dark:text-slate-300 hover:bg-slate-100"}`
+  }, /*#__PURE__*/React.createElement("span", null, tab.icon), /*#__PURE__*/React.createElement("span", null, tab.label)))), activeTab === "branding" && /*#__PURE__*/React.createElement("div", {
+    className: "bg-white dark:bg-slate-850 p-6 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 space-y-5"
+  }, /*#__PURE__*/React.createElement("h3", {
+    className: "text-sm font-bold uppercase tracking-wider text-slate-500"
+  }, t.tabBranding), /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-1 md:grid-cols-2 gap-4"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
-    className: "block text-xs font-bold uppercase text-slate-500 mb-1"
+    className: "block text-xs font-bold mb-1"
   }, t.fieldBusinessName), /*#__PURE__*/React.createElement("input", {
     type: "text",
     value: form.businessName,
@@ -1040,69 +1173,63 @@ function CreatorStudio({
       ...form,
       businessName: e.target.value
     }),
-    className: "w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white"
+    className: "w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-medium"
   })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
-    className: "block text-xs font-bold uppercase text-slate-500 mb-1"
-  }, t.fieldCategory), /*#__PURE__*/React.createElement("input", {
+    className: "block text-xs font-bold mb-1"
+  }, t.fieldCategory, " (", lang.toUpperCase(), ")"), /*#__PURE__*/React.createElement("input", {
     type: "text",
     value: form.category,
     onChange: e => setForm({
       ...form,
       category: e.target.value
     }),
-    className: "w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white"
+    className: "w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-medium"
   })), /*#__PURE__*/React.createElement("div", {
     className: "md:col-span-2"
   }, /*#__PURE__*/React.createElement("label", {
-    className: "block text-xs font-bold uppercase text-slate-500 mb-1"
-  }, t.fieldTagline), /*#__PURE__*/React.createElement("input", {
+    className: "block text-xs font-bold mb-1"
+  }, t.fieldTagline, " (", lang.toUpperCase(), ")"), /*#__PURE__*/React.createElement("input", {
     type: "text",
     value: form.tagline,
     onChange: e => setForm({
       ...form,
       tagline: e.target.value
     }),
-    className: "w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white"
+    className: "w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-medium"
   })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
-    className: "block text-xs font-bold uppercase text-slate-500 mb-1"
+    className: "block text-xs font-bold mb-1"
   }, t.fieldLogoUrl), /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center space-x-3"
-  }, /*#__PURE__*/React.createElement("img", {
-    src: form.logoUrl,
-    alt: "Logo",
-    className: "w-10 h-10 rounded-xl object-cover border",
-    onError: e => {
-      e.target.src = "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=150";
-    }
-  }), /*#__PURE__*/React.createElement("input", {
-    type: "url",
+    className: "flex gap-2"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "text",
     value: form.logoUrl,
     onChange: e => setForm({
       ...form,
       logoUrl: e.target.value
     }),
-    className: "flex-1 px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900"
+    className: "flex-1 px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-medium"
+  }), /*#__PURE__*/React.createElement("img", {
+    src: form.logoUrl,
+    alt: "Logo",
+    className: "w-9 h-9 rounded-xl object-cover border"
   }))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
-    className: "block text-xs font-bold uppercase text-slate-500 mb-1"
+    className: "block text-xs font-bold mb-1"
   }, t.fieldCoverUrl), /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center space-x-3"
-  }, /*#__PURE__*/React.createElement("img", {
-    src: form.coverUrl,
-    alt: "Cover",
-    className: "w-14 h-10 rounded-xl object-cover border",
-    onError: e => {
-      e.target.src = "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=300";
-    }
-  }), /*#__PURE__*/React.createElement("input", {
-    type: "url",
+    className: "flex gap-2"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "text",
     value: form.coverUrl,
     onChange: e => setForm({
       ...form,
       coverUrl: e.target.value
     }),
-    className: "flex-1 px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900"
+    className: "flex-1 px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-medium"
+  }), /*#__PURE__*/React.createElement("img", {
+    src: form.coverUrl,
+    alt: "Cover",
+    className: "w-14 h-9 rounded-xl object-cover border"
   }))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
-    className: "block text-xs font-bold uppercase text-slate-500 mb-1"
+    className: "block text-xs font-bold mb-1"
   }, t.fieldPhone), /*#__PURE__*/React.createElement("input", {
     type: "text",
     value: form.contact.phone,
@@ -1113,10 +1240,10 @@ function CreatorStudio({
         phone: e.target.value
       }
     }),
-    className: "w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900"
+    className: "w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-medium"
   })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
-    className: "block text-xs font-bold uppercase text-slate-500 mb-1"
-  }, t.fieldAddress), /*#__PURE__*/React.createElement("input", {
+    className: "block text-xs font-bold mb-1"
+  }, t.fieldAddress, " (", lang.toUpperCase(), ")"), /*#__PURE__*/React.createElement("input", {
     type: "text",
     value: form.contact.address,
     onChange: e => setForm({
@@ -1126,10 +1253,10 @@ function CreatorStudio({
         address: e.target.value
       }
     }),
-    className: "w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900"
+    className: "w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-medium"
   })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
-    className: "block text-xs font-bold uppercase text-slate-500 mb-1"
-  }, t.fieldWorkingHours), /*#__PURE__*/React.createElement("input", {
+    className: "block text-xs font-bold mb-1"
+  }, t.fieldWorkingHours, " (", lang.toUpperCase(), ")"), /*#__PURE__*/React.createElement("input", {
     type: "text",
     value: form.contact.workingHours,
     onChange: e => setForm({
@@ -1139,9 +1266,9 @@ function CreatorStudio({
         workingHours: e.target.value
       }
     }),
-    className: "w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900"
+    className: "w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-medium"
   })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
-    className: "block text-xs font-bold uppercase text-slate-500 mb-1"
+    className: "block text-xs font-bold mb-1"
   }, t.fieldCurrency), /*#__PURE__*/React.createElement("input", {
     type: "text",
     value: form.currency,
@@ -1149,39 +1276,69 @@ function CreatorStudio({
       ...form,
       currency: e.target.value
     }),
-    className: "w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900"
-  }))), activeTab === "colors" && /*#__PURE__*/React.createElement("div", {
-    className: "bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 space-y-6"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-2 sm:grid-cols-3 gap-3"
-  }, palettes.map((p, i) => /*#__PURE__*/React.createElement("button", {
-    key: i,
+    className: "w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-medium"
+  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "block text-xs font-bold mb-1"
+  }, t.fieldInstagram), /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    value: form.contact.instagram,
+    onChange: e => setForm({
+      ...form,
+      contact: {
+        ...form.contact,
+        instagram: e.target.value
+      }
+    }),
+    className: "w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-medium"
+  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "block text-xs font-bold mb-1"
+  }, t.fieldTelegramBot), /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    value: form.contact.telegramBot,
+    onChange: e => setForm({
+      ...form,
+      contact: {
+        ...form.contact,
+        telegramBot: e.target.value
+      }
+    }),
+    className: "w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-medium"
+  })))), activeTab === "colors" && /*#__PURE__*/React.createElement("div", {
+    className: "bg-white dark:bg-slate-850 p-6 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 space-y-5"
+  }, /*#__PURE__*/React.createElement("h3", {
+    className: "text-sm font-bold uppercase tracking-wider text-slate-500"
+  }, t.tabColorsStyle), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "block text-xs font-bold mb-2"
+  }, "Preset Designer Palettes"), /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-2 sm:grid-cols-3 gap-2"
+  }, palettes.map((p, idx) => /*#__PURE__*/React.createElement("button", {
+    key: idx,
     onClick: () => setForm({
       ...form,
       primaryColor: p.primary,
       accentColor: p.accent
     }),
-    className: "p-3 rounded-2xl border text-left flex items-center justify-between hover:border-slate-400 bg-slate-50 dark:bg-slate-850"
+    className: "p-3 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-primary text-left flex items-center space-x-3 transition active:scale-95"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex -space-x-2"
   }, /*#__PURE__*/React.createElement("span", {
-    className: "text-xs font-bold text-slate-800 dark:text-slate-200"
-  }, p.name), /*#__PURE__*/React.createElement("div", {
-    className: "flex space-x-1.5"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "w-4 h-4 rounded-full",
+    className: "w-5 h-5 rounded-full border border-white shadow-sm",
     style: {
       backgroundColor: p.primary
     }
   }), /*#__PURE__*/React.createElement("span", {
-    className: "w-4 h-4 rounded-full",
+    className: "w-5 h-5 rounded-full border border-white shadow-sm",
     style: {
       backgroundColor: p.accent
     }
-  }))))), /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-2 gap-6 pt-4 border-t border-slate-100 dark:border-slate-700"
+  })), /*#__PURE__*/React.createElement("span", {
+    className: "text-xs font-bold truncate"
+  }, p.name))))), /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
-    className: "block text-xs font-bold uppercase text-slate-500 mb-2"
+    className: "block text-xs font-bold mb-1"
   }, t.fieldPrimaryColor), /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center space-x-3"
+    className: "flex items-center space-x-2"
   }, /*#__PURE__*/React.createElement("input", {
     type: "color",
     value: form.primaryColor,
@@ -1189,7 +1346,7 @@ function CreatorStudio({
       ...form,
       primaryColor: e.target.value
     }),
-    className: "w-12 h-12 rounded-xl cursor-pointer"
+    className: "w-10 h-10 rounded-xl cursor-pointer p-0.5 border"
   }), /*#__PURE__*/React.createElement("input", {
     type: "text",
     value: form.primaryColor,
@@ -1197,11 +1354,11 @@ function CreatorStudio({
       ...form,
       primaryColor: e.target.value
     }),
-    className: "w-28 px-3 py-2 text-xs font-mono rounded-xl border"
+    className: "flex-1 px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-mono font-bold"
   }))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
-    className: "block text-xs font-bold uppercase text-slate-500 mb-2"
+    className: "block text-xs font-bold mb-1"
   }, t.fieldAccentColor), /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center space-x-3"
+    className: "flex items-center space-x-2"
   }, /*#__PURE__*/React.createElement("input", {
     type: "color",
     value: form.accentColor,
@@ -1209,7 +1366,7 @@ function CreatorStudio({
       ...form,
       accentColor: e.target.value
     }),
-    className: "w-12 h-12 rounded-xl cursor-pointer"
+    className: "w-10 h-10 rounded-xl cursor-pointer p-0.5 border"
   }), /*#__PURE__*/React.createElement("input", {
     type: "text",
     value: form.accentColor,
@@ -1217,145 +1374,134 @@ function CreatorStudio({
       ...form,
       accentColor: e.target.value
     }),
-    className: "w-28 px-3 py-2 text-xs font-mono rounded-xl border"
+    className: "flex-1 px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-mono font-bold"
   }))))), activeTab === "services" && /*#__PURE__*/React.createElement("div", {
-    className: "bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 space-y-4"
+    className: "bg-white dark:bg-slate-850 p-6 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 space-y-5"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "flex justify-between items-center"
-  }, /*#__PURE__*/React.createElement("h3", {
-    className: "font-bold text-base text-slate-900 dark:text-white"
-  }, t.servicesManagerTitle), /*#__PURE__*/React.createElement("button", {
-    onClick: () => {
-      setEditingIndex(null);
-      setSrvForm({
-        id: "srv-" + Date.now(),
-        name: "",
-        category: "Generale",
-        price: 50,
-        duration: "45 min",
-        description: "",
-        popular: false
-      });
-      setServiceModal(true);
-    },
-    className: "px-4 py-2 rounded-xl bg-primary text-white font-bold text-xs"
+    className: "flex items-center justify-between"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h3", {
+    className: "text-sm font-bold uppercase tracking-wider text-slate-500"
+  }, t.servicesManagerTitle), /*#__PURE__*/React.createElement("p", {
+    className: "text-xs text-slate-400 mt-0.5"
+  }, t.servicesManagerDesc)), /*#__PURE__*/React.createElement("button", {
+    onClick: openAddService,
+    className: "px-3.5 py-2 rounded-xl bg-primary text-white font-bold text-xs shadow-md shadow-primary/20 transition active:scale-95"
   }, t.addNewServiceBtn)), /*#__PURE__*/React.createElement("div", {
-    className: "space-y-3 pt-2"
+    className: "divide-y divide-slate-100 dark:divide-slate-800 border rounded-2xl overflow-hidden"
   }, form.services.map((srv, idx) => /*#__PURE__*/React.createElement("div", {
     key: srv.id || idx,
-    className: "p-4 rounded-2xl bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-700 flex justify-between items-center"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "p-4 flex items-center justify-between gap-4 hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex-1"
+  }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center space-x-2"
   }, /*#__PURE__*/React.createElement("span", {
-    className: "text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700"
-  }, srv.category), srv.popular && /*#__PURE__*/React.createElement("span", {
-    className: "text-[10px] text-amber-500 font-bold"
+    className: "text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-500"
+  }, getLocalized(srv.category, lang)), srv.popular && /*#__PURE__*/React.createElement("span", {
+    className: "text-[10px] font-bold text-amber-500"
   }, "\uD83D\uDD25 Top")), /*#__PURE__*/React.createElement("h4", {
-    className: "font-bold text-sm text-slate-900 dark:text-white mt-1"
-  }, srv.name), /*#__PURE__*/React.createElement("p", {
-    className: "text-xs text-slate-500"
-  }, srv.description)), /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center space-x-4"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "text-right"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "font-black text-sm"
-  }, srv.price, " ", form.currency), /*#__PURE__*/React.createElement("span", {
-    className: "text-xs text-slate-400"
-  }, "\u23F1\uFE0F ", srv.duration)), /*#__PURE__*/React.createElement("button", {
-    onClick: () => {
-      setEditingIndex(idx);
-      setSrvForm({
-        ...srv
-      });
-      setServiceModal(true);
-    },
-    className: "p-1.5 text-slate-400 hover:text-white"
-  }, "\u270F\uFE0F"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => setForm({
-      ...form,
-      services: form.services.filter((_, i) => i !== idx)
-    }),
-    className: "p-1.5 text-slate-400 hover:text-rose-500"
-  }, "\uD83D\uDDD1\uFE0F")))))), activeTab === "export" && /*#__PURE__*/React.createElement("div", {
-    className: "bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 space-y-4"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex gap-3"
+    className: "text-sm font-bold text-slate-900 dark:text-white mt-1"
+  }, getLocalized(srv.name, lang)), /*#__PURE__*/React.createElement("p", {
+    className: "text-xs text-slate-400 line-clamp-1"
+  }, getLocalized(srv.description, lang))), /*#__PURE__*/React.createElement("div", {
+    className: "text-right whitespace-nowrap"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-sm font-black text-slate-900 dark:text-white"
+  }, getLocalized(srv.price, lang), " ", form.currency), /*#__PURE__*/React.createElement("span", {
+    className: "text-[11px] block text-slate-400"
+  }, "\u23F1\uFE0F ", getLocalized(srv.duration, lang))), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center space-x-1"
   }, /*#__PURE__*/React.createElement("button", {
-    onClick: () => {
-      navigator.clipboard?.writeText(generateCode());
-      showToast(t.configCodeCopied);
-    },
-    className: "px-4 py-2.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 font-bold text-xs"
+    onClick: () => openEditService(idx),
+    className: "p-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition",
+    title: "Modifica"
+  }, "\u270F\uFE0F"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => handleDeleteService(idx),
+    className: "p-2 rounded-xl text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition",
+    title: "Elimina"
+  }, "\uD83D\uDDD1\uFE0F")))))), activeTab === "export" && /*#__PURE__*/React.createElement("div", {
+    className: "bg-white dark:bg-slate-850 p-6 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 space-y-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center justify-between"
+  }, /*#__PURE__*/React.createElement("h3", {
+    className: "text-sm font-bold uppercase tracking-wider text-slate-500"
+  }, t.tabExportCode), /*#__PURE__*/React.createElement("div", {
+    className: "flex space-x-2"
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: handleCopyCode,
+    className: "px-3.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-xs font-bold transition"
   }, "\uD83D\uDCCB ", t.copyConfigBtn), /*#__PURE__*/React.createElement("button", {
-    onClick: onResetToDefault,
-    className: "px-4 py-2.5 rounded-xl border text-xs font-semibold text-slate-500"
-  }, t.resetToDefaultConfig)), /*#__PURE__*/React.createElement("pre", {
-    className: "p-4 bg-slate-950 text-slate-200 rounded-2xl font-mono text-xs overflow-x-auto max-h-80 border border-slate-800 select-all"
-  }, generateCode())), serviceModal && /*#__PURE__*/React.createElement("div", {
+    onClick: handleDownloadCode,
+    className: "px-3.5 py-1.5 rounded-xl bg-primary text-white text-xs font-bold transition shadow-sm"
+  }, "\uD83D\uDCBE ", t.downloadConfigBtn))), /*#__PURE__*/React.createElement("pre", {
+    className: "p-4 bg-slate-900 text-slate-100 text-[11px] rounded-2xl overflow-x-auto font-mono max-h-80 scrollbar-none"
+  }, generateConfigJsCode())), serviceModal && /*#__PURE__*/React.createElement("div", {
     className: "fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fade-in font-sans"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border p-6 space-y-3"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex justify-between items-center pb-2 border-b"
+    className: "w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-2xl border border-slate-200 dark:border-slate-800 animate-scale-up space-y-4"
   }, /*#__PURE__*/React.createElement("h3", {
-    className: "font-bold text-base text-slate-900 dark:text-white"
-  }, editingIndex !== null ? t.editServiceTitle : t.newServiceTitle), /*#__PURE__*/React.createElement("button", {
-    onClick: () => setServiceModal(false)
-  }, "\u2715")), /*#__PURE__*/React.createElement("form", {
+    className: "text-base font-black text-slate-900 dark:text-white"
+  }, editingIndex !== null ? t.editServiceTitle : t.newServiceTitle), /*#__PURE__*/React.createElement("form", {
     onSubmit: handleSaveService,
-    className: "space-y-3 text-xs"
-  }, /*#__PURE__*/React.createElement("input", {
+    className: "space-y-3"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "block text-xs font-bold mb-1"
+  }, t.serviceName, " (", lang.toUpperCase(), ")"), /*#__PURE__*/React.createElement("input", {
     type: "text",
-    required: true,
-    placeholder: t.serviceName,
     value: srvForm.name,
     onChange: e => setSrvForm({
       ...srvForm,
       name: e.target.value
     }),
-    className: "w-full px-3 py-2 rounded-xl border bg-slate-50 dark:bg-slate-800"
-  }), /*#__PURE__*/React.createElement("div", {
+    className: "w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border text-xs font-medium",
+    required: true
+  })), /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-2 gap-2"
-  }, /*#__PURE__*/React.createElement("input", {
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "block text-xs font-bold mb-1"
+  }, t.serviceCategory), /*#__PURE__*/React.createElement("input", {
     type: "text",
-    required: true,
-    placeholder: t.serviceCategory,
     value: srvForm.category,
     onChange: e => setSrvForm({
       ...srvForm,
       category: e.target.value
     }),
-    className: "w-full px-3 py-2 rounded-xl border bg-slate-50 dark:bg-slate-800"
-  }), /*#__PURE__*/React.createElement("input", {
+    className: "w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border text-xs font-medium",
+    required: true
+  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "block text-xs font-bold mb-1"
+  }, t.servicePrice), /*#__PURE__*/React.createElement("input", {
     type: "number",
-    required: true,
-    placeholder: t.servicePrice,
     value: srvForm.price,
     onChange: e => setSrvForm({
       ...srvForm,
-      price: Number(e.target.value)
+      price: e.target.value
     }),
-    className: "w-full px-3 py-2 rounded-xl border bg-slate-50 dark:bg-slate-800"
-  })), /*#__PURE__*/React.createElement("input", {
+    className: "w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border text-xs font-medium",
+    required: true
+  }))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "block text-xs font-bold mb-1"
+  }, t.serviceDuration), /*#__PURE__*/React.createElement("input", {
     type: "text",
-    placeholder: t.serviceDuration,
     value: srvForm.duration,
     onChange: e => setSrvForm({
       ...srvForm,
       duration: e.target.value
     }),
-    className: "w-full px-3 py-2 rounded-xl border bg-slate-50 dark:bg-slate-800"
-  }), /*#__PURE__*/React.createElement("textarea", {
-    placeholder: t.serviceDescription,
+    className: "w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border text-xs font-medium",
+    required: true
+  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "block text-xs font-bold mb-1"
+  }, t.serviceDescription, " (", lang.toUpperCase(), ")"), /*#__PURE__*/React.createElement("textarea", {
+    rows: 2,
     value: srvForm.description,
     onChange: e => setSrvForm({
       ...srvForm,
       description: e.target.value
     }),
-    className: "w-full px-3 py-2 rounded-xl border bg-slate-50 dark:bg-slate-800"
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center space-x-2"
+    className: "w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border text-xs font-medium resize-none"
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center space-x-2 pt-1"
   }, /*#__PURE__*/React.createElement("input", {
     type: "checkbox",
     id: "pop",
@@ -1363,33 +1509,231 @@ function CreatorStudio({
     onChange: e => setSrvForm({
       ...srvForm,
       popular: e.target.checked
-    })
+    }),
+    className: "rounded text-primary focus:ring-primary"
   }), /*#__PURE__*/React.createElement("label", {
-    htmlFor: "pop"
+    htmlFor: "pop",
+    className: "text-xs font-bold"
   }, t.servicePopular)), /*#__PURE__*/React.createElement("div", {
-    className: "flex gap-2 pt-2"
+    className: "flex justify-end space-x-2 pt-3"
   }, /*#__PURE__*/React.createElement("button", {
-    type: "submit",
-    className: "flex-1 py-2.5 rounded-xl bg-primary text-white font-bold"
-  }, t.saveServiceBtn), /*#__PURE__*/React.createElement("button", {
     type: "button",
     onClick: () => setServiceModal(false),
-    className: "px-4 py-2.5 rounded-xl border"
-  }, t.cancelBtn))))));
+    className: "px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold transition"
+  }, t.cancelBtn), /*#__PURE__*/React.createElement("button", {
+    type: "submit",
+    className: "px-4 py-2 rounded-xl bg-primary text-white text-xs font-bold transition shadow-sm"
+  }, t.saveServiceBtn))))));
 }
 
-// --- Main Application Controller ---
-function MainApp() {
-  // Navigation mode: "customer" | "admin" | "creator"
-  const [tab, setTab] = useState("customer");
-  const [fullWidth, setFullWidth] = useState(false);
+// ==============================================================================
+// 6. TELEGRAM ALERT COMPONENT
+// ==============================================================================
+function TelegramAlert({
+  order,
+  onClose,
+  onOpenAdmin,
+  t
+}) {
+  if (!order) return null;
+  useEffect(() => {
+    try {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (AudioContext) {
+        const ctx = new AudioContext();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.15);
+        gain.gain.setValueAtTime(0.12, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.35);
+      }
+    } catch (e) {}
+  }, [order]);
+  return /*#__PURE__*/React.createElement("div", {
+    className: "fixed inset-x-4 top-4 md:top-6 md:right-6 md:left-auto md:max-w-md z-50 animate-bounce-in transition-all"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "bg-slate-900/95 text-white backdrop-blur-xl border border-sky-500/40 rounded-3xl shadow-2xl p-5 ring-1 ring-white/10 overflow-hidden font-sans"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center justify-between border-b border-slate-800 pb-3 mb-3"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center space-x-2.5"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "w-8 h-8 rounded-full bg-gradient-to-tr from-sky-500 to-blue-600 flex items-center justify-center text-white shadow-md"
+  }, "\u2708\uFE0F"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center space-x-1.5"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-xs font-bold text-sky-400"
+  }, t.telegramBotTitle), /*#__PURE__*/React.createElement("span", {
+    className: "text-[10px] bg-sky-500/20 text-sky-300 px-1.5 py-0.5 rounded-full font-mono font-medium"
+  }, "LIVE")), /*#__PURE__*/React.createElement("p", {
+    className: "text-[11px] text-slate-400"
+  }, t.telegramBotChannel))), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center space-x-2"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-[11px] text-slate-400"
+  }, t.telegramJustNow), /*#__PURE__*/React.createElement("button", {
+    onClick: onClose,
+    className: "text-slate-400 hover:text-white p-1 rounded-lg"
+  }, "\u2715"))), /*#__PURE__*/React.createElement("div", {
+    className: "bg-slate-950/60 rounded-2xl p-3.5 border border-slate-800/80 font-mono text-xs space-y-1.5"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "text-emerald-400 font-semibold flex items-center space-x-1 font-sans"
+  }, /*#__PURE__*/React.createElement("span", null, "\u2728 ", t.telegramNewLead)), /*#__PURE__*/React.createElement("div", {
+    className: "h-px bg-slate-800 my-1"
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-[85px_1fr] gap-x-2 text-[11px]"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-slate-400"
+  }, t.telegramClient), /*#__PURE__*/React.createElement("span", {
+    className: "text-white font-medium font-sans"
+  }, order.clientName), /*#__PURE__*/React.createElement("span", {
+    className: "text-slate-400"
+  }, t.telegramPhone), /*#__PURE__*/React.createElement("span", {
+    className: "text-sky-400 font-sans"
+  }, order.clientPhone), /*#__PURE__*/React.createElement("span", {
+    className: "text-slate-400"
+  }, t.telegramService), /*#__PURE__*/React.createElement("span", {
+    className: "text-white font-sans"
+  }, order.serviceName), /*#__PURE__*/React.createElement("span", {
+    className: "text-slate-400"
+  }, t.telegramTime), /*#__PURE__*/React.createElement("span", {
+    className: "text-amber-300 font-sans"
+  }, order.date, ", ", order.time), /*#__PURE__*/React.createElement("span", {
+    className: "text-slate-400"
+  }, t.telegramTotal), /*#__PURE__*/React.createElement("span", {
+    className: "text-emerald-400 font-bold font-sans"
+  }, order.price, " ", order.currency), order.comment && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("span", {
+    className: "text-slate-400"
+  }, t.telegramNotes), /*#__PURE__*/React.createElement("span", {
+    className: "text-slate-300 italic font-sans"
+  }, order.comment)))), /*#__PURE__*/React.createElement("div", {
+    className: "mt-3.5 flex items-center gap-2"
+  }, onOpenAdmin && /*#__PURE__*/React.createElement("button", {
+    onClick: onOpenAdmin,
+    className: "flex-1 bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold py-2 px-3 rounded-xl text-xs transition active:scale-95"
+  }, t.telegramOpenAdmin), /*#__PURE__*/React.createElement("button", {
+    onClick: onClose,
+    className: "px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-medium transition"
+  }, t.telegramDismiss))));
+}
 
-  // Active Language: "it" | "en" | "uk" (default to IT as requested)
+// ==============================================================================
+// 7. WHITE-LABEL QUICK PRESETS MODAL
+// ==============================================================================
+function WhiteLabelDemo({
+  currentConfig,
+  isOpen,
+  onClose,
+  onSelectPreset,
+  onCustomUpdate,
+  t,
+  lang
+}) {
+  if (!isOpen) return null;
+  const presets = [{
+    id: "beautySalon",
+    brand: "Luxe Studio",
+    icon: "💅",
+    colors: ["#7c3aed", "#db2777"],
+    data: businessPresets.beautySalon
+  }, {
+    id: "barberShop",
+    brand: "Blade & Barber",
+    icon: "💈",
+    colors: ["#d97706", "#334155"],
+    data: businessPresets.barberShop
+  }, {
+    id: "autoDetailing",
+    brand: "Apex Auto Spa",
+    icon: "🚗",
+    colors: ["#0284c7", "#ef4444"],
+    data: businessPresets.autoDetailing
+  }, {
+    id: "coffeeRoastery",
+    brand: "Kava Craft & Roasters",
+    icon: "☕",
+    colors: ["#92400e", "#ea580c"],
+    data: businessPresets.coffeeRoastery
+  }];
+  return /*#__PURE__*/React.createElement("div", {
+    className: "fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fade-in font-sans"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "w-full max-w-lg bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col max-h-[90vh] animate-scale-up",
+    onClick: e => e.stopPropagation()
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/50"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center space-x-2"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-xl"
+  }, "\uD83C\uDFA8"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h3", {
+    className: "text-base font-black text-slate-900 dark:text-white"
+  }, t.wlTitle || "White-Label Configuratore"), /*#__PURE__*/React.createElement("p", {
+    className: "text-xs text-slate-500 dark:text-slate-400"
+  }, t.wlSubtitle || "Cambia settore e stile in 1 minuto"))), /*#__PURE__*/React.createElement("button", {
+    onClick: onClose,
+    className: "w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-white"
+  }, "\u2715")), /*#__PURE__*/React.createElement("div", {
+    className: "p-6 overflow-y-auto space-y-3"
+  }, /*#__PURE__*/React.createElement("p", {
+    className: "text-xs text-slate-500 dark:text-slate-400"
+  }, t.wlDesc || "Seleziona uno dei preset pronti per vedere l'app adattarsi all'istante a un nuovo settore:"), /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2"
+  }, presets.map(preset => {
+    const isCurrent = currentConfig.businessName === preset.brand;
+    const presetCategory = getLocalized(preset.data.category, lang);
+    return /*#__PURE__*/React.createElement("button", {
+      key: preset.id,
+      onClick: () => {
+        onSelectPreset(preset.data);
+        onClose();
+      },
+      className: `p-4 rounded-2xl border text-left transition flex flex-col justify-between h-36 relative ${isCurrent ? "border-primary bg-primary/5 dark:bg-primary/10 ring-2 ring-primary/30" : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/80 hover:border-slate-300"}`
+    }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      className: "flex items-center justify-between"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "text-2xl"
+    }, preset.icon), /*#__PURE__*/React.createElement("div", {
+      className: "flex -space-x-1.5"
+    }, preset.colors.map((c, i) => /*#__PURE__*/React.createElement("span", {
+      key: i,
+      className: "w-4 h-4 rounded-full border border-white dark:border-slate-900 shadow-sm",
+      style: {
+        backgroundColor: c
+      }
+    })))), /*#__PURE__*/React.createElement("h4", {
+      className: "text-sm font-black text-slate-900 dark:text-white mt-2 leading-tight"
+    }, preset.brand), /*#__PURE__*/React.createElement("p", {
+      className: "text-xs text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5"
+    }, presetCategory)), /*#__PURE__*/React.createElement("div", {
+      className: "flex items-center justify-between text-[11px] pt-2 border-t border-slate-100 dark:border-slate-800"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "text-slate-400 font-semibold"
+    }, preset.data.services?.length || 4, " servizi"), isCurrent ? /*#__PURE__*/React.createElement("span", {
+      className: "text-primary font-bold"
+    }, "\u2713 ", t.wlActive || "Attivo") : /*#__PURE__*/React.createElement("span", {
+      className: "text-slate-400 hover:text-primary font-medium"
+    }, t.wlApply || "Applica", " \u2192")));
+  })))));
+}
+
+// ==============================================================================
+// 8. ROOT MAIN APPLICATION
+// ==============================================================================
+export default function MainApp() {
+  // 1. Language state: 'it' (default) | 'en' | 'uk'
   const [lang, setLang] = useState(() => {
     try {
-      return localStorage.getItem("businesskit_lang") || "it";
+      const saved = localStorage.getItem("businesskit_lang");
+      return saved && ['it', 'en', 'uk'].includes(saved) ? saved : 'it';
     } catch (e) {
-      return "it";
+      return 'it';
     }
   });
   const t = translations[lang] || translations.it;
@@ -1400,7 +1744,11 @@ function MainApp() {
     } catch (e) {}
   };
 
-  // Active configuration (loads custom saved from localStorage or default businessConfig)
+  // 2. Navigation tab: "customer" | "admin" | "creator"
+  const [tab, setTab] = useState("customer");
+  const [fullWidth, setFullWidth] = useState(false);
+
+  // 3. Business config
   const [cfg, setCfg] = useState(() => {
     try {
       const saved = localStorage.getItem("businesskit_custom_config");
@@ -1410,37 +1758,13 @@ function MainApp() {
     }
   });
 
-  // Orders in localStorage
+  // 4. Orders state
   const [orders, setOrders] = useState(() => {
     try {
-      const s = localStorage.getItem("businesskit_orders");
-      return s ? JSON.parse(s) : [{
-        id: "BK-7891",
-        clientName: "Marco Rossi",
-        clientPhone: "+39 340 111 22 33",
-        serviceName: "Trattamento Viso & SPA Relax",
-        price: 75,
-        duration: "60 min",
-        date: "Domani",
-        time: "14:00",
-        comment: "Primo appuntamento",
-        status: "new",
-        createdAt: new Date(Date.now() - 15 * 60000).toISOString()
-      }, {
-        id: "BK-7890",
-        clientName: "Sofia Bianchi",
-        clientPhone: "+39 349 222 33 44",
-        serviceName: "Taglio & Piega Personalizzata",
-        price: 45,
-        duration: "45 min",
-        date: "Oggi",
-        time: "17:30",
-        comment: "",
-        status: "confirmed",
-        createdAt: new Date(Date.now() - 120 * 60000).toISOString()
-      }];
+      const saved = localStorage.getItem("businesskit_orders");
+      return saved ? JSON.parse(saved) : getInitialOrders(lang);
     } catch (e) {
-      return [];
+      return getInitialOrders(lang);
     }
   });
   const [telegramNotif, setTelegramNotif] = useState(null);
@@ -1479,25 +1803,31 @@ function MainApp() {
     const names = lang === 'it' ? ["Alessandro Ferrari", "Giulia Romano", "Matteo Colombo", "Chiara Ricci"] : lang === 'uk' ? ["Денис Кравчук", "Марія Литвин", "Артем Васильєв", "Світлана Ткач"] : ["David Miller", "Emily Watson", "James Wilson", "Sarah Davis"];
     const randomName = names[Math.floor(Math.random() * names.length)];
     const srv = cfg.services[Math.floor(Math.random() * cfg.services.length)] || {
-      name: "Consulenza",
+      name: "Servizio Prova",
       price: 50,
       duration: "30 min"
     };
+    const srvName = getLocalized(srv.name, lang);
+    const srvPrice = getLocalized(srv.price, lang);
+    const srvDuration = getLocalized(srv.duration, lang);
+    const srvCurrency = getLocalized(cfg.currency, lang) || (lang === 'uk' ? 'грн' : '€');
+    const dayLabel = lang === 'it' ? "Oggi" : lang === 'uk' ? "Сьогодні" : "Today";
     handleNewBooking({
       id: "BK-" + Math.floor(1000 + Math.random() * 9000),
       clientName: randomName,
       clientPhone: lang === 'it' ? `+39 34${Math.floor(10000000 + Math.random() * 90000000)}` : `+380 97 ${Math.floor(100 + Math.random() * 900)} ${Math.floor(10 + Math.random() * 90)}`,
-      serviceName: srv.name,
-      price: srv.price,
-      currency: cfg.currency || "€",
-      duration: srv.duration,
-      date: lang === 'it' ? "Oggi" : lang === 'uk' ? "Сьогодні" : "Today",
+      serviceName: srvName,
+      price: srvPrice,
+      currency: srvCurrency,
+      duration: srvDuration,
+      date: dayLabel,
       time: "16:30",
       comment: "Lead generato per test",
       status: "new",
       createdAt: new Date().toISOString()
     });
   };
+  const localizedCategory = getLocalized(cfg.category, lang);
   return /*#__PURE__*/React.createElement("div", {
     className: "min-h-screen bg-slate-100 dark:bg-slate-950 flex flex-col font-sans transition-colors"
   }, /*#__PURE__*/React.createElement("header", {
@@ -1516,16 +1846,16 @@ function MainApp() {
     className: "text-[10px] font-bold uppercase bg-primary/10 text-primary px-2 py-0.5 rounded-full border border-primary/20"
   }, "White-Label MVP")), /*#__PURE__*/React.createElement("p", {
     className: "text-[11px] text-slate-500 hidden sm:block"
-  }, t.currentBusiness, " ", /*#__PURE__*/React.createElement("strong", null, cfg.businessName), " (", cfg.category, ")"))), /*#__PURE__*/React.createElement("div", {
+  }, t.currentBusiness, " ", /*#__PURE__*/React.createElement("strong", null, cfg.businessName), " (", localizedCategory, ")"))), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl border border-slate-200 dark:border-slate-700"
   }, /*#__PURE__*/React.createElement("button", {
     onClick: () => setTab("customer"),
-    className: `flex items-center space-x-1.5 px-3 sm:px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition ${tab === "customer" ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm" : "text-slate-500 hover:text-slate-900"}`
+    className: `flex items-center space-x-1.5 px-3 sm:px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition ${tab === "customer" ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm" : "text-slate-500 hover:text-slate-900 dark:hover:text-white"}`
   }, /*#__PURE__*/React.createElement("span", null, "\uD83D\uDCF1"), /*#__PURE__*/React.createElement("span", {
     className: "hidden md:inline"
   }, t.customerApp)), /*#__PURE__*/React.createElement("button", {
     onClick: () => setTab("admin"),
-    className: `flex items-center space-x-1.5 px-3 sm:px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition ${tab === "admin" ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm" : "text-slate-500 hover:text-slate-900"}`
+    className: `flex items-center space-x-1.5 px-3 sm:px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition ${tab === "admin" ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm" : "text-slate-500 hover:text-slate-900 dark:hover:text-white"}`
   }, /*#__PURE__*/React.createElement("span", null, "\uD83D\uDCBC"), /*#__PURE__*/React.createElement("span", {
     className: "hidden md:inline"
   }, t.adminDashboard), orders.filter(o => o.status === 'new').length > 0 && /*#__PURE__*/React.createElement("span", {
@@ -1541,15 +1871,15 @@ function MainApp() {
     className: "flex items-center bg-slate-100 dark:bg-slate-800 p-0.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold"
   }, /*#__PURE__*/React.createElement("button", {
     onClick: () => handleSetLang("it"),
-    className: `px-2 py-1 rounded-lg transition ${lang === "it" ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm" : "text-slate-400 hover:text-slate-700"}`,
+    className: `px-2 py-1 rounded-lg transition ${lang === "it" ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm" : "text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"}`,
     title: "Italiano"
   }, "\uD83C\uDDEE\uD83C\uDDF9 IT"), /*#__PURE__*/React.createElement("button", {
     onClick: () => handleSetLang("en"),
-    className: `px-2 py-1 rounded-lg transition ${lang === "en" ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm" : "text-slate-400 hover:text-slate-700"}`,
+    className: `px-2 py-1 rounded-lg transition ${lang === "en" ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm" : "text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"}`,
     title: "English"
   }, "\uD83C\uDDEC\uD83C\uDDE7 EN"), /*#__PURE__*/React.createElement("button", {
     onClick: () => handleSetLang("uk"),
-    className: `px-2 py-1 rounded-lg transition ${lang === "uk" ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm" : "text-slate-400 hover:text-slate-700"}`,
+    className: `px-2 py-1 rounded-lg transition ${lang === "uk" ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm" : "text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"}`,
     title: "\u0423\u043A\u0440\u0430\u0457\u043D\u0441\u044C\u043A\u0430"
   }, "\uD83C\uDDFA\uD83C\uDDE6 UK")), /*#__PURE__*/React.createElement("button", {
     onClick: () => setWlOpen(true),
@@ -1584,7 +1914,8 @@ function MainApp() {
         window.location.reload();
       }
     },
-    t: t
+    t: t,
+    lang: lang
   }), tab === "creator" && /*#__PURE__*/React.createElement(CreatorStudio, {
     config: cfg,
     onSaveConfig: handleSaveConfig,
@@ -1608,7 +1939,8 @@ function MainApp() {
       ...prev,
       ...custom
     })),
-    t: t
+    t: t,
+    lang: lang
   }));
 }
 

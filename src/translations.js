@@ -177,7 +177,16 @@ export const translations = {
     copyConfigBtn: "Copia Codice per src/config.js",
     downloadConfigBtn: "Scarica config.js pronto",
     configCodeCopied: "Codice copiato negli appunti!",
-    resetToDefaultConfig: "Ripristina Configurazione Originale"
+    resetToDefaultConfig: "Ripristina Configurazione Originale",
+
+    // White-Label Quick Presets Modal
+    wlTitle: "Configuratore White-Label",
+    wlSubtitle: "Personalizza brand o cambia settore in 1 minuto",
+    wlTabPresets: "⚡ Preset di Settore",
+    wlTabCustom: "🛠️ Personalizzazione Rapida",
+    wlDesc: "Scegli un preset per vedere come l'app si trasforma istantaneamente per un'altra attività:",
+    wlApply: "Applica Questo Preset",
+    wlActive: "Attivo"
   },
 
   // ==========================================
@@ -350,7 +359,16 @@ export const translations = {
     copyConfigBtn: "Copy Code for src/config.js",
     downloadConfigBtn: "Download Ready config.js",
     configCodeCopied: "Configuration code copied to clipboard!",
-    resetToDefaultConfig: "Reset to Default Configuration"
+    resetToDefaultConfig: "Reset to Default Configuration",
+
+    // White-Label Quick Presets Modal
+    wlTitle: "White-Label Configurator",
+    wlSubtitle: "Switch brand identity and business niche in 1 minute",
+    wlTabPresets: "⚡ Business Presets",
+    wlTabCustom: "🛠️ Quick Customization",
+    wlDesc: "Select a ready preset to see the app instantly adapt to another business niche:",
+    wlApply: "Apply This Preset",
+    wlActive: "Active"
   },
 
   // ==========================================
@@ -523,6 +541,15 @@ export const translations = {
     copyConfigBtn: "Скопіювати код для src/config.js",
     downloadConfigBtn: "Завантажити готовий config.js",
     configCodeCopied: "Код конфігурації скопійовано в буфер обміну!",
-    resetToDefaultConfig: "Скинути до початкового конфігу"
+    resetToDefaultConfig: "Скинути до початкового конфігу",
+
+    // White-Label Quick Presets Modal
+    wlTitle: "White-Label Конфігуратор",
+    wlSubtitle: "Зміна бренду та стилю за 1 хвилину",
+    wlTabPresets: "⚡ Готові бізнес-пресети",
+    wlTabCustom: "🛠️ Швидке налаштування",
+    wlDesc: "Оберіть будь-який пресет, щоб миттєво побачити, як додаток перевтілюється під іншу нішу:",
+    wlApply: "Застосувати пресет",
+    wlActive: "Активний"
   }
 };
