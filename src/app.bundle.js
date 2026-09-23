@@ -1,4 +1,5 @@
 import { businessConfig, businessPresets } from './config.js';
+import { translations } from './translations.js';
 const _global = typeof window !== 'undefined' ? window : globalThis;
 const React = _global.React;
 const ReactDOM = _global.ReactDOM;
@@ -9,18 +10,27 @@ const {
   useRef
 } = React;
 
-// --- Dynamic Date Generator ---
-function getNextDays() {
+// --- Dynamic Date Generator with Locale Support ---
+function getNextDays(locale = 'it') {
   const days = [];
-  const dayNames = ["Нд", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
-  const monthNames = ["січ", "лют", "бер", "кві", "тра", "чер", "лип", "сер", "вер", "жов", "лис", "груд"];
   const now = new Date();
   for (let i = 0; i < 5; i++) {
     const d = new Date(now);
     d.setDate(now.getDate() + i);
-    let label = dayNames[d.getDay()];
-    if (i === 0) label = "Сьогодні";else if (i === 1) label = "Завтра";
-    const sub = `${d.getDate()} ${monthNames[d.getMonth()]}`;
+    let label = "";
+    if (i === 0) {
+      label = locale === 'it' ? "Oggi" : locale === 'uk' ? "Сьогодні" : "Today";
+    } else if (i === 1) {
+      label = locale === 'it' ? "Domani" : locale === 'uk' ? "Завтра" : "Tomorrow";
+    } else {
+      label = d.toLocaleDateString(locale === 'uk' ? 'uk-UA' : locale === 'it' ? 'it-IT' : 'en-US', {
+        weekday: 'short'
+      });
+    }
+    const sub = d.toLocaleDateString(locale === 'uk' ? 'uk-UA' : locale === 'it' ? 'it-IT' : 'en-US', {
+      day: 'numeric',
+      month: 'short'
+    });
     const dateStr = `${d.getDate().toString().padStart(2, '0')}.${(d.getMonth() + 1).toString().padStart(2, '0')}.${d.getFullYear()}`;
     days.push({
       label,
@@ -36,7 +46,8 @@ function PhoneMockup({
   children,
   isFullWidth,
   onToggleViewMode,
-  businessName
+  businessName,
+  t
 }) {
   if (isFullWidth) {
     return /*#__PURE__*/React.createElement("div", {
@@ -51,10 +62,10 @@ function PhoneMockup({
       className: "inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"
     }), /*#__PURE__*/React.createElement("span", {
       className: "font-medium"
-    }, "\u0414\u0435\u0441\u043A\u0442\u043E\u043F\u043D\u0438\u0439 \u043F\u043E\u0432\u043D\u043E\u0435\u043A\u0440\u0430\u043D\u043D\u0438\u0439 \u0432\u0438\u0433\u043B\u044F\u0434 (", businessName, ")")), /*#__PURE__*/React.createElement("button", {
+    }, t.desktopModeTitle, " (", businessName, ")")), /*#__PURE__*/React.createElement("button", {
       onClick: onToggleViewMode,
       className: "inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-xs font-semibold text-slate-800 dark:text-slate-100 transition shadow-sm active:scale-95"
-    }, /*#__PURE__*/React.createElement("span", null, "\uD83D\uDCF1 \u041F\u0435\u0440\u0435\u0439\u0442\u0438 \u0434\u043E \u043C\u043E\u0431\u0456\u043B\u044C\u043D\u043E\u0433\u043E \u0444\u0440\u0435\u0439\u043C\u0443"))), /*#__PURE__*/React.createElement("div", {
+    }, /*#__PURE__*/React.createElement("span", null, t.switchToPhone))), /*#__PURE__*/React.createElement("div", {
       className: "bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-700/80 overflow-hidden"
     }, children)));
   }
@@ -66,10 +77,10 @@ function PhoneMockup({
     className: "flex items-center space-x-1.5 bg-white dark:bg-slate-800 px-3 py-1.5 rounded-full shadow-sm border border-slate-200 dark:border-slate-700"
   }, /*#__PURE__*/React.createElement("span", {
     className: "inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"
-  }), /*#__PURE__*/React.createElement("span", null, "iPhone 15 Pro \u2022 Live Mockup")), /*#__PURE__*/React.createElement("button", {
+  }), /*#__PURE__*/React.createElement("span", null, t.mockupTitle)), /*#__PURE__*/React.createElement("button", {
     onClick: onToggleViewMode,
     className: "inline-flex items-center space-x-1 px-3 py-1.5 rounded-full bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 shadow-sm transition active:scale-95"
-  }, /*#__PURE__*/React.createElement("span", null, "\uD83D\uDDA5\uFE0F \u041D\u0430 \u0432\u0435\u0441\u044C \u0435\u043A\u0440\u0430\u043D"))), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("span", null, t.switchToDesktop))), /*#__PURE__*/React.createElement("div", {
     className: "relative w-full max-w-[395px] h-[844px] bg-slate-900 rounded-[52px] p-[10px] shadow-[0_25px_60px_-15px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.1),inset_0_0_0_2px_rgba(255,255,255,0.15)] ring-1 ring-slate-800 flex flex-col"
   }, /*#__PURE__*/React.createElement("div", {
     className: "relative w-full h-full bg-white dark:bg-slate-900 rounded-[44px] overflow-hidden flex flex-col"
@@ -100,38 +111,33 @@ function BookingModal({
   config,
   isOpen,
   onClose,
-  onSubmitBooking
+  onSubmitBooking,
+  t,
+  lang
 }) {
   if (!isOpen || !service) return null;
-  const days = useMemo(() => getNextDays(), []);
+  const days = useMemo(() => getNextDays(lang), [lang]);
   const timeSlots = ["09:30", "11:00", "12:30", "14:00", "15:30", "17:00", "18:30", "20:00"];
   const [selectedDay, setSelectedDay] = useState(days[1] || days[0]);
   const [selectedTime, setSelectedTime] = useState("14:00");
   const [clientName, setClientName] = useState("");
-  const [clientPhone, setClientPhone] = useState("+380 ");
+  const [clientPhone, setClientPhone] = useState("+39 ");
   const [comment, setComment] = useState("");
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const handlePhoneChange = val => {
-    if (!val.startsWith("+380")) {
-      setClientPhone("+380 ");
-      return;
-    }
-    setClientPhone(val);
-    if (errors.clientPhone) setErrors(prev => ({
-      ...prev,
-      clientPhone: null
-    }));
-  };
+  useEffect(() => {
+    if (lang === 'uk' && clientPhone === '+39 ') setClientPhone('+380 ');
+    if (lang === 'en' && (clientPhone === '+39 ' || clientPhone === '+380 ')) setClientPhone('+1 ');
+  }, [lang]);
   const handleSubmit = e => {
     e.preventDefault();
     const errs = {};
-    if (!clientName.trim()) errs.clientName = "Будь ласка, вкажіть ваше ім'я";
+    if (!clientName.trim()) errs.clientName = t.errName;
     const digits = clientPhone.replace(/\D/g, '');
-    if (digits.length < 10) {
-      errs.clientPhone = "Введіть номер повністю (напр. +380 97 123 4567)";
+    if (digits.length < 8) {
+      errs.clientPhone = t.errPhone;
     }
-    if (!selectedTime) errs.selectedTime = "Оберіть час візиту";
+    if (!selectedTime) errs.selectedTime = t.errTime;
     if (Object.keys(errs).length > 0) {
       setErrors(errs);
       return;
@@ -145,7 +151,7 @@ function BookingModal({
         serviceId: service.id,
         serviceName: service.name,
         price: service.price,
-        currency: config.currency || "грн",
+        currency: config.currency || "€",
         duration: service.duration,
         date: `${selectedDay.label} (${selectedDay.sub})`,
         rawDate: selectedDay.dateStr,
@@ -161,7 +167,7 @@ function BookingModal({
     }, 350);
   };
   return /*#__PURE__*/React.createElement("div", {
-    className: "fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/60 backdrop-blur-sm animate-fade-in"
+    className: "fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/60 backdrop-blur-sm animate-fade-in font-sans"
   }, /*#__PURE__*/React.createElement("div", {
     className: "w-full sm:max-w-lg bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col max-h-[90vh] animate-slide-up",
     onClick: e => e.stopPropagation()
@@ -169,7 +175,7 @@ function BookingModal({
     className: "flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
     className: "text-[11px] font-bold uppercase tracking-wider text-slate-400"
-  }, "\u0428\u0432\u0438\u0434\u043A\u0438\u0439 \u043E\u043D\u043B\u0430\u0439\u043D-\u0437\u0430\u043F\u0438\u0441"), /*#__PURE__*/React.createElement("h3", {
+  }, t.quickBookingTitle), /*#__PURE__*/React.createElement("h3", {
     className: "text-base font-bold text-slate-900 dark:text-white leading-tight"
   }, config.businessName)), /*#__PURE__*/React.createElement("button", {
     onClick: onClose,
@@ -180,7 +186,7 @@ function BookingModal({
     className: "p-4 rounded-2xl bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800/60 dark:to-slate-800 border border-slate-200/80 dark:border-slate-700/60 flex items-start justify-between"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
     className: "text-[10px] font-bold text-primary px-2 py-0.5 rounded-full bg-primary/10 inline-block mb-1"
-  }, service.category || "Послуга"), /*#__PURE__*/React.createElement("h4", {
+  }, service.category || t.serviceLabel), /*#__PURE__*/React.createElement("h4", {
     className: "font-bold text-slate-900 dark:text-white text-sm sm:text-base leading-snug"
   }, service.name), /*#__PURE__*/React.createElement("div", {
     className: "mt-1 text-xs text-slate-500 dark:text-slate-400 font-medium"
@@ -188,14 +194,14 @@ function BookingModal({
     className: "text-right whitespace-nowrap pl-2"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-[10px] text-slate-400 block"
-  }, "\u0412\u0430\u0440\u0442\u0456\u0441\u0442\u044C"), /*#__PURE__*/React.createElement("span", {
+  }, t.thPrice), /*#__PURE__*/React.createElement("span", {
     className: "text-base sm:text-lg font-black text-slate-900 dark:text-white"
-  }, service.price, " ", config.currency || "грн"))), /*#__PURE__*/React.createElement("form", {
+  }, service.price, " ", config.currency || "€"))), /*#__PURE__*/React.createElement("form", {
     onSubmit: handleSubmit,
     className: "space-y-4"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
     className: "block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-2"
-  }, "1. \u041E\u0431\u0435\u0440\u0456\u0442\u044C \u0434\u0430\u0442\u0443 \u0432\u0456\u0437\u0438\u0442\u0443"), /*#__PURE__*/React.createElement("div", {
+  }, t.step1Date), /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-5 gap-1.5 sm:gap-2"
   }, days.map((d, i) => {
     const isSel = selectedDay.dateStr === d.dateStr;
@@ -213,9 +219,9 @@ function BookingModal({
     className: "flex justify-between items-center mb-2"
   }, /*#__PURE__*/React.createElement("label", {
     className: "text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300"
-  }, "2. \u041E\u0431\u0435\u0440\u0456\u0442\u044C \u0437\u0440\u0443\u0447\u043D\u0438\u0439 \u0447\u0430\u0441"), /*#__PURE__*/React.createElement("span", {
+  }, t.step2Time), /*#__PURE__*/React.createElement("span", {
     className: "text-[11px] text-slate-400"
-  }, "\u0412\u0456\u043B\u044C\u043D\u0456 \u0433\u043E\u0434\u0438\u043D\u0438")), /*#__PURE__*/React.createElement("div", {
+  }, t.freeSlots)), /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-4 gap-2"
   }, timeSlots.map(slot => {
     const isSel = selectedTime === slot;
@@ -237,7 +243,7 @@ function BookingModal({
     className: "space-y-3 pt-2 border-t border-slate-100 dark:border-slate-800"
   }, /*#__PURE__*/React.createElement("label", {
     className: "block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300"
-  }, "3. \u041A\u043E\u043D\u0442\u0430\u043A\u0442\u043D\u0456 \u0434\u0430\u043D\u0456"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("input", {
+  }, t.step3Contact), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("input", {
     type: "text",
     value: clientName,
     onChange: e => {
@@ -247,15 +253,21 @@ function BookingModal({
         clientName: null
       }));
     },
-    placeholder: "\u0412\u0430\u0448\u0435 \u0456\u043C'\u044F (\u043D\u0430\u043F\u0440. \u041E\u043B\u0435\u043D\u0430 \u0447\u0438 \u041E\u043B\u0435\u043A\u0441\u0430\u043D\u0434\u0440)",
+    placeholder: t.namePlaceholder,
     className: `w-full px-3.5 py-2.5 text-sm rounded-xl border bg-slate-50/50 dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 ${errors.clientName ? "border-rose-400" : "border-slate-200 dark:border-slate-700 focus:border-primary"}`
   }), errors.clientName && /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-rose-500 font-medium mt-1"
   }, errors.clientName)), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("input", {
     type: "tel",
     value: clientPhone,
-    onChange: e => handlePhoneChange(e.target.value),
-    placeholder: "+380 97 123 4567",
+    onChange: e => {
+      setClientPhone(e.target.value);
+      if (errors.clientPhone) setErrors(prev => ({
+        ...prev,
+        clientPhone: null
+      }));
+    },
+    placeholder: t.phonePlaceholder,
     className: `w-full px-3.5 py-2.5 text-sm rounded-xl border bg-slate-50/50 dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 ${errors.clientPhone ? "border-rose-400" : "border-slate-200 dark:border-slate-700 focus:border-primary"}`
   }), errors.clientPhone && /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-rose-500 font-medium mt-1"
@@ -263,34 +275,33 @@ function BookingModal({
     type: "text",
     value: comment,
     onChange: e => setComment(e.target.value),
-    placeholder: "\u041F\u043E\u0431\u0430\u0436\u0430\u043D\u043D\u044F \u0447\u0438 \u043A\u043E\u043C\u0435\u043D\u0442\u0430\u0440 \u043C\u0430\u0439\u0441\u0442\u0440\u0443 (\u043D\u0435\u043E\u0431\u043E\u0432'\u044F\u0437\u043A\u043E\u0432\u043E)",
+    placeholder: t.commentPlaceholder,
     className: "w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-primary"
   }))), /*#__PURE__*/React.createElement("button", {
     type: "submit",
     disabled: isSubmitting,
     className: "w-full py-3.5 px-4 rounded-2xl bg-primary hover:opacity-95 text-white font-bold text-sm tracking-wide shadow-lg shadow-primary/25 transition active:scale-[0.99] flex items-center justify-center space-x-2 mt-4"
-  }, isSubmitting ? /*#__PURE__*/React.createElement("span", null, "\u0421\u0442\u0432\u043E\u0440\u0435\u043D\u043D\u044F \u0437\u0430\u043F\u0438\u0441\u0443...") : /*#__PURE__*/React.createElement("span", null, "\u2728 \u041F\u0456\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u0438 \u0437\u0430\u043F\u0438\u0441 (", service.price, " ", config.currency || "грн", ")")), /*#__PURE__*/React.createElement("p", {
+  }, isSubmitting ? /*#__PURE__*/React.createElement("span", null, t.submittingBtn) : /*#__PURE__*/React.createElement("span", null, "\u2728 ", t.confirmBookingBtn, " (", service.price, " ", config.currency || "€", ")")), /*#__PURE__*/React.createElement("p", {
     className: "text-[11px] text-center text-slate-400"
-  }, "\uD83D\uDD12 \u041C\u0438\u0442\u0442\u0454\u0432\u0435 \u0431\u0440\u043E\u043D\u044E\u0432\u0430\u043D\u043D\u044F \u2022 \u041E\u043F\u043B\u0430\u0442\u0430 \u043D\u0430 \u043C\u0456\u0441\u0446\u0456")))));
+  }, "\uD83D\uDD12 ", t.instantConfirmNotice)))));
 }
 
 // --- 3. TelegramAlert Component ---
 function TelegramAlert({
   order,
   onClose,
-  onOpenAdmin
+  onOpenAdmin,
+  t
 }) {
   if (!order) return null;
   useEffect(() => {
-    // Audio Chime using Web Audio API
     try {
       const AudioContext = window.AudioContext || window.webkitAudioContext;
       if (AudioContext) {
         const ctx = new AudioContext();
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
-        osc.frequency.setValueAtTime(659.25, ctx.currentTime); // E5
-        osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.15); // A5
+        osc.frequency.setValueAtTime(659.25, ctx.currentTime);
         gain.gain.setValueAtTime(0.1, ctx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
         osc.connect(gain);
@@ -299,21 +310,10 @@ function TelegramAlert({
         osc.stop(ctx.currentTime + 0.35);
       }
     } catch (e) {}
-
-    // Rich Console Output
-    console.log(`%c ✈️ [Telegram Bot Alert] %c Новий запис: ${order.clientName} (${order.clientPhone}) | ${order.serviceName} - ${order.price} грн`, 'background: #0088cc; color: #fff; font-weight: bold; border-radius: 4px; padding: 4px 8px;', 'color: #0088cc; font-weight: bold;');
-    console.table({
-      "ID Замовлення": order.id,
-      "Клієнт": order.clientName,
-      "Телефон": order.clientPhone,
-      "Послуга": order.serviceName,
-      "Дата та час": `${order.date}, о ${order.time}`,
-      "Сума": `${order.price} ${order.currency}`,
-      "Коментар": order.comment || "Без коментаря"
-    });
+    console.log(`%c ✈️ [Telegram Bot Alert] %c ${order.clientName} (${order.clientPhone}) | ${order.serviceName} - ${order.price} ${order.currency}`, 'background: #0088cc; color: #fff; font-weight: bold; border-radius: 4px; padding: 4px 8px;', 'color: #0088cc; font-weight: bold;');
   }, [order]);
   return /*#__PURE__*/React.createElement("div", {
-    className: "fixed inset-x-4 top-4 md:top-6 md:right-6 md:left-auto md:max-w-md z-50 animate-bounce-in"
+    className: "fixed inset-x-4 top-4 md:top-6 md:right-6 md:left-auto md:max-w-md z-50 animate-bounce-in font-sans"
   }, /*#__PURE__*/React.createElement("div", {
     className: "bg-slate-900/95 text-white backdrop-blur-xl border border-sky-500/40 rounded-3xl shadow-2xl p-5 ring-1 ring-white/10"
   }, /*#__PURE__*/React.createElement("div", {
@@ -326,42 +326,46 @@ function TelegramAlert({
     className: "flex items-center space-x-1.5"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-xs font-bold text-sky-400"
-  }, "Telegram Bot Notification"), /*#__PURE__*/React.createElement("span", {
+  }, t.telegramBotTitle), /*#__PURE__*/React.createElement("span", {
     className: "text-[10px] bg-sky-500/20 text-sky-300 px-1.5 py-0.5 rounded-full font-mono font-medium"
   }, "LIVE")), /*#__PURE__*/React.createElement("p", {
     className: "text-[11px] text-slate-400"
-  }, "\u041A\u0430\u043D\u0430\u043B \u0441\u043F\u043E\u0432\u0456\u0449\u0435\u043D\u044C \u0430\u0434\u043C\u0456\u043D\u0456\u0441\u0442\u0440\u0430\u0442\u043E\u0440\u0430"))), /*#__PURE__*/React.createElement("button", {
+  }, t.telegramBotChannel))), /*#__PURE__*/React.createElement("button", {
     onClick: onClose,
     className: "text-slate-400 hover:text-white p-1"
   }, "\u2715")), /*#__PURE__*/React.createElement("div", {
     className: "bg-slate-950/70 rounded-2xl p-3.5 border border-slate-800 font-mono text-xs space-y-1.5"
   }, /*#__PURE__*/React.createElement("div", {
     className: "text-emerald-400 font-semibold font-sans"
-  }, "\u2728 \u041D\u043E\u0432\u0438\u0439 \u0437\u0430\u043F\u0438\u0441 \u0432\u0456\u0434 BusinessKit!"), /*#__PURE__*/React.createElement("div", {
+  }, "\u2728 ", t.telegramNewLead), /*#__PURE__*/React.createElement("div", {
     className: "h-px bg-slate-800 my-1"
   }), /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-[75px_1fr] gap-x-2 text-[11px]"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-slate-400"
-  }, "\u041A\u043B\u0456\u0454\u043D\u0442:"), /*#__PURE__*/React.createElement("span", {
+  }, t.telegramClient), /*#__PURE__*/React.createElement("span", {
     className: "text-white font-medium font-sans"
   }, order.clientName), /*#__PURE__*/React.createElement("span", {
     className: "text-slate-400"
-  }, "\u0422\u0435\u043B\u0435\u0444\u043E\u043D:"), /*#__PURE__*/React.createElement("span", {
+  }, t.telegramPhone), /*#__PURE__*/React.createElement("span", {
     className: "text-sky-400 font-sans"
   }, order.clientPhone), /*#__PURE__*/React.createElement("span", {
     className: "text-slate-400"
-  }, "\u041F\u043E\u0441\u043B\u0443\u0433\u0430:"), /*#__PURE__*/React.createElement("span", {
+  }, t.telegramService), /*#__PURE__*/React.createElement("span", {
     className: "text-white font-sans"
   }, order.serviceName), /*#__PURE__*/React.createElement("span", {
     className: "text-slate-400"
-  }, "\u0427\u0430\u0441:"), /*#__PURE__*/React.createElement("span", {
+  }, t.telegramTime), /*#__PURE__*/React.createElement("span", {
     className: "text-amber-300 font-sans"
-  }, order.date, ", \u043E ", order.time), /*#__PURE__*/React.createElement("span", {
+  }, order.date, ", ", order.time), /*#__PURE__*/React.createElement("span", {
     className: "text-slate-400"
-  }, "\u0421\u0443\u043C\u0430:"), /*#__PURE__*/React.createElement("span", {
+  }, t.telegramTotal), /*#__PURE__*/React.createElement("span", {
     className: "text-emerald-400 font-bold font-sans"
-  }, order.price, " ", order.currency || "грн"))), /*#__PURE__*/React.createElement("div", {
+  }, order.price, " ", order.currency || "€"), order.comment && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("span", {
+    className: "text-slate-400"
+  }, t.telegramNotes), /*#__PURE__*/React.createElement("span", {
+    className: "text-slate-300 italic font-sans"
+  }, order.comment)))), /*#__PURE__*/React.createElement("div", {
     className: "mt-3.5 flex items-center gap-2"
   }, /*#__PURE__*/React.createElement("button", {
     onClick: () => {
@@ -369,10 +373,10 @@ function TelegramAlert({
       onClose();
     },
     className: "flex-1 bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold py-2 px-3 rounded-xl text-xs transition active:scale-95 text-center shadow-md shadow-sky-500/20"
-  }, "\u0412\u0456\u0434\u043A\u0440\u0438\u0442\u0438 \u0432 \u0410\u0434\u043C\u0456\u043D\u0446\u0456"), /*#__PURE__*/React.createElement("button", {
+  }, t.telegramOpenAdmin), /*#__PURE__*/React.createElement("button", {
     onClick: onClose,
     className: "px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-medium"
-  }, "\u0417\u0433\u043E\u0440\u043D\u0443\u0442\u0438"))));
+  }, t.telegramDismiss))));
 }
 
 // --- 4. CustomerApp Component ---
@@ -380,23 +384,33 @@ function CustomerApp({
   config,
   onBookService,
   lastOrder,
-  onResetLastOrder
+  onResetLastOrder,
+  t,
+  lang
 }) {
-  const [selectedCat, setSelectedCat] = useState("Всі");
+  const [selectedCat, setSelectedCat] = useState("all");
   const [bookingSrv, setBookingSrv] = useState(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const categories = useMemo(() => {
-    const c = ["Всі"];
+    const c = [{
+      id: "all",
+      label: t.all
+    }];
     if (config.services) {
       config.services.forEach(s => {
-        if (s.category && !c.includes(s.category)) c.push(s.category);
+        if (s.category && !c.some(item => item.id === s.category)) {
+          c.push({
+            id: s.category,
+            label: s.category
+          });
+        }
       });
     }
     return c;
-  }, [config.services]);
+  }, [config.services, t.all]);
   const filtered = useMemo(() => {
     if (!config.services) return [];
-    if (selectedCat === "Всі") return config.services;
+    if (selectedCat === "all") return config.services;
     return config.services.filter(s => s.category === selectedCat);
   }, [config.services, selectedCat]);
   return /*#__PURE__*/React.createElement("div", {
@@ -417,9 +431,9 @@ function CustomerApp({
     className: "px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-md text-white font-medium border border-white/10 flex items-center space-x-1"
   }, /*#__PURE__*/React.createElement("span", {
     className: "w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"
-  }), /*#__PURE__*/React.createElement("span", null, "\u0412\u0456\u0434\u0447\u0438\u043D\u0435\u043D\u043E \u0437\u0430\u0440\u0430\u0437")), /*#__PURE__*/React.createElement("span", {
+  }), /*#__PURE__*/React.createElement("span", null, t.openNow)), /*#__PURE__*/React.createElement("span", {
     className: "px-2.5 py-1 rounded-full bg-white/20 backdrop-blur-md text-white font-bold border border-white/20"
-  }, "\u2605 ", config.rating || 4.9, " (", config.reviewsCount || 100, "+)"))), /*#__PURE__*/React.createElement("div", {
+  }, "\u2605 ", config.rating || 4.9, " (", config.reviewsCount || 100, "+ ", t.reviews, ")"))), /*#__PURE__*/React.createElement("div", {
     className: "px-4 pt-0 -mt-12 relative z-10"
   }, /*#__PURE__*/React.createElement("div", {
     className: "bg-white dark:bg-slate-850 rounded-2xl p-4 shadow-lg border border-slate-200/80 dark:border-slate-800"
@@ -442,7 +456,7 @@ function CustomerApp({
   }, /*#__PURE__*/React.createElement("a", {
     href: `tel:${config.contact?.phone}`,
     className: "px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-primary/10 hover:text-primary transition font-medium whitespace-nowrap"
-  }, "\uD83D\uDCDE \u0414\u0437\u0432\u0456\u043D\u043E\u043A"), config.contact?.instagram && /*#__PURE__*/React.createElement("a", {
+  }, "\uD83D\uDCDE ", t.call), config.contact?.instagram && /*#__PURE__*/React.createElement("a", {
     href: `https://instagram.com/${config.contact.instagram.replace('@', '')}`,
     target: "_blank",
     rel: "noreferrer",
@@ -455,15 +469,15 @@ function CustomerApp({
     className: "flex items-center justify-between mb-2"
   }, /*#__PURE__*/React.createElement("h2", {
     className: "text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400"
-  }, "\u041A\u0430\u0442\u0430\u043B\u043E\u0433 \u043F\u043E\u0441\u043B\u0443\u0433"), /*#__PURE__*/React.createElement("span", {
+  }, t.selectService), /*#__PURE__*/React.createElement("span", {
     className: "text-xs text-slate-400"
-  }, filtered.length, " \u0434\u043E\u0441\u0442\u0443\u043F\u043D\u043E")), /*#__PURE__*/React.createElement("div", {
+  }, filtered.length, " ", t.available)), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center space-x-2 overflow-x-auto pb-2 scrollbar-none"
   }, categories.map(cat => /*#__PURE__*/React.createElement("button", {
-    key: cat,
-    onClick: () => setSelectedCat(cat),
-    className: `px-3.5 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap ${selectedCat === cat ? "bg-primary text-white shadow-md shadow-primary/25 scale-[1.02]" : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-slate-300"}`
-  }, cat)))), /*#__PURE__*/React.createElement("div", {
+    key: cat.id,
+    onClick: () => setSelectedCat(cat.id),
+    className: `px-3.5 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap ${selectedCat === cat.id ? "bg-primary text-white shadow-md shadow-primary/25 scale-[1.02]" : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-slate-300"}`
+  }, cat.label)))), /*#__PURE__*/React.createElement("div", {
     className: "px-4 mt-3 space-y-3 flex-1 pb-20"
   }, filtered.map(srv => /*#__PURE__*/React.createElement("div", {
     key: srv.id,
@@ -476,13 +490,13 @@ function CustomerApp({
     className: "text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
   }, srv.category), srv.popular && /*#__PURE__*/React.createElement("span", {
     className: "text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 border border-amber-500/20"
-  }, "\uD83D\uDD25 \u0425\u0456\u0442")), /*#__PURE__*/React.createElement("h3", {
+  }, "\uD83D\uDD25 ", t.popularHit)), /*#__PURE__*/React.createElement("h3", {
     className: "text-sm font-bold text-slate-900 dark:text-white mt-1.5"
   }, srv.name)), /*#__PURE__*/React.createElement("div", {
     className: "text-right whitespace-nowrap pl-2"
   }, /*#__PURE__*/React.createElement("div", {
     className: "text-base font-black text-slate-900 dark:text-white"
-  }, srv.price, " ", config.currency || "грн"), /*#__PURE__*/React.createElement("span", {
+  }, srv.price, " ", config.currency || "€"), /*#__PURE__*/React.createElement("span", {
     className: "text-[11px] text-slate-400"
   }, "\u23F1\uFE0F ", srv.duration))), srv.description && /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed"
@@ -490,10 +504,10 @@ function CustomerApp({
     className: "mt-3.5 pt-3 border-t border-slate-100 dark:border-slate-700/50 flex items-center justify-between"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-[11px] text-emerald-600 dark:text-emerald-400 font-medium"
-  }, "\u25CF \u0412\u0456\u043B\u044C\u043D\u0456 \u0432\u0456\u043A\u043D\u0430 \u043D\u0430 \u0437\u0430\u0432\u0442\u0440\u0430"), /*#__PURE__*/React.createElement("button", {
+  }, "\u25CF ", t.freeSlotsTomorrow), /*#__PURE__*/React.createElement("button", {
     onClick: () => setBookingSrv(srv),
     className: "px-3.5 py-1.5 rounded-xl bg-primary text-white font-bold text-xs shadow-sm shadow-primary/20 transition active:scale-95"
-  }, "\u0417\u0430\u043F\u0438\u0441\u0430\u0442\u0438\u0441\u044F \u2192"))))), /*#__PURE__*/React.createElement(BookingModal, {
+  }, t.bookNow))))), /*#__PURE__*/React.createElement(BookingModal, {
     service: bookingSrv,
     config: config,
     isOpen: !!bookingSrv,
@@ -501,20 +515,22 @@ function CustomerApp({
     onSubmitBooking: order => {
       onBookService(order);
       setShowSuccess(true);
-    }
+    },
+    t: t,
+    lang: lang
   }), showSuccess && lastOrder && /*#__PURE__*/React.createElement("div", {
-    className: "fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fade-in"
+    className: "fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fade-in font-sans"
   }, /*#__PURE__*/React.createElement("div", {
     className: "w-full max-w-sm bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-2xl border border-slate-200 dark:border-slate-800 text-center animate-scale-up"
   }, /*#__PURE__*/React.createElement("div", {
     className: "w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-500 border-2 border-emerald-500/30 flex items-center justify-center mx-auto text-2xl shadow-lg mb-4 animate-bounce"
   }, "\u2713"), /*#__PURE__*/React.createElement("span", {
     className: "text-[11px] font-bold uppercase tracking-wider text-emerald-600 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-0.5 rounded-full inline-block mb-1"
-  }, "\u0417\u0430\u043F\u0438\u0441 \u0443\u0441\u043F\u0456\u0448\u043D\u043E \u0441\u0442\u0432\u043E\u0440\u0435\u043D\u043E!"), /*#__PURE__*/React.createElement("h3", {
+  }, t.bookingSuccessBadge), /*#__PURE__*/React.createElement("h3", {
     className: "text-xl font-black text-slate-900 dark:text-white"
-  }, "\u0414\u044F\u043A\u0443\u0454\u043C\u043E, ", lastOrder.clientName, "!"), /*#__PURE__*/React.createElement("p", {
+  }, t.thankYou, ", ", lastOrder.clientName, "!"), /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-slate-500 dark:text-slate-400 mt-1"
-  }, "\u0427\u0435\u043A\u0430\u0454\u043C\u043E \u043D\u0430 \u0432\u0430\u0441 \u0443 ", /*#__PURE__*/React.createElement("span", {
+  }, t.bookingSummaryDesc, " ", /*#__PURE__*/React.createElement("span", {
     className: "font-semibold text-slate-700 dark:text-slate-200"
   }, config.businessName)), /*#__PURE__*/React.createElement("div", {
     className: "my-4 p-3.5 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 text-left text-xs space-y-1.5 font-medium"
@@ -522,25 +538,25 @@ function CustomerApp({
     className: "flex justify-between"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-slate-400"
-  }, "\u041F\u043E\u0441\u043B\u0443\u0433\u0430:"), /*#__PURE__*/React.createElement("span", {
+  }, t.serviceLabel), /*#__PURE__*/React.createElement("span", {
     className: "font-bold"
   }, lastOrder.serviceName)), /*#__PURE__*/React.createElement("div", {
     className: "flex justify-between"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-slate-400"
-  }, "\u0414\u0430\u0442\u0430/\u0427\u0430\u0441:"), /*#__PURE__*/React.createElement("span", {
+  }, t.dateTimeLabel), /*#__PURE__*/React.createElement("span", {
     className: "text-primary font-bold"
   }, lastOrder.date, ", ", lastOrder.time)), /*#__PURE__*/React.createElement("div", {
     className: "flex justify-between"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-slate-400"
-  }, "\u0414\u043E \u0441\u043F\u043B\u0430\u0442\u0438:"), /*#__PURE__*/React.createElement("span", {
+  }, t.priceLabel), /*#__PURE__*/React.createElement("span", {
     className: "text-emerald-600 font-bold"
   }, lastOrder.price, " ", lastOrder.currency)), /*#__PURE__*/React.createElement("div", {
     className: "flex justify-between"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-slate-400"
-  }, "\u041D\u043E\u043C\u0435\u0440 \u0431\u0440\u043E\u043D\u0456:"), /*#__PURE__*/React.createElement("span", {
+  }, t.bookingIdLabel), /*#__PURE__*/React.createElement("span", {
     className: "font-mono text-slate-500"
   }, "#", lastOrder.id.slice(-4)))), /*#__PURE__*/React.createElement("div", {
     className: "p-2.5 bg-sky-50 dark:bg-sky-950/40 rounded-xl border border-sky-200 dark:border-sky-800/60 text-[11px] text-sky-800 dark:text-sky-300 flex items-center space-x-2 text-left mb-5"
@@ -548,15 +564,15 @@ function CustomerApp({
     className: "text-base"
   }, "\u2708\uFE0F"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
     className: "font-bold"
-  }, "\u0421\u043F\u043E\u0432\u0456\u0449\u0435\u043D\u043D\u044F \u043D\u0430\u0434\u0456\u0441\u043B\u0430\u043D\u043E \u0432 Telegram"), /*#__PURE__*/React.createElement("p", {
+  }, t.telegramNoticeTitle), /*#__PURE__*/React.createElement("p", {
     className: "text-[10px] text-sky-600 dark:text-sky-400"
-  }, "\u0410\u0434\u043C\u0456\u043D\u0456\u0441\u0442\u0440\u0430\u0442\u043E\u0440 \u0443\u0436\u0435 \u0431\u0430\u0447\u0438\u0442\u044C \u0432\u0430\u0448 \u0437\u0430\u043F\u0438\u0441."))), /*#__PURE__*/React.createElement("button", {
+  }, t.telegramNoticeDesc))), /*#__PURE__*/React.createElement("button", {
     onClick: () => {
       setShowSuccess(false);
       onResetLastOrder && onResetLastOrder();
     },
     className: "w-full py-3 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold text-xs shadow-md active:scale-95 transition"
-  }, "\u0413\u043E\u0442\u043E\u0432\u043E"))));
+  }, t.doneBtn))));
 }
 
 // --- 5. AdminDashboard Component ---
@@ -566,7 +582,8 @@ function AdminDashboard({
   onDeleteOrder,
   onAddSampleOrder,
   onResetOrders,
-  config
+  config,
+  t
 }) {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
@@ -580,16 +597,14 @@ function AdminDashboard({
   const newCount = orders.filter(o => o.status === 'new').length;
   const confirmedCount = orders.filter(o => o.status === 'confirmed').length;
   const completedCount = orders.filter(o => o.status === 'completed').length;
-
-  // Export to CSV Function
   const handleExportCSV = () => {
-    const headers = ["ID", "Час створення", "Клієнт", "Телефон", "Послуга", "Дата візиту", "Час", "Ціна", "Валюта", "Статус", "Коментар"];
-    const rows = orders.map(o => [o.id, o.createdAt, o.clientName, o.clientPhone, o.serviceName, o.date, o.time, o.price, o.currency, o.status, `"${o.comment || ''}"`]);
+    const headers = [t.thIdTime, t.thClientPhone, t.thService, t.thDate, t.thPrice, t.thStatus, t.telegramNotes];
+    const rows = orders.map(o => [o.id, `"${o.clientName} (${o.clientPhone})"`, `"${o.serviceName}"`, `"${o.date} ${o.time}"`, `${o.price} ${o.currency}`, o.status, `"${o.comment || ''}"`]);
     const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `businesskit_leads_${Date.now()}.csv`);
+    link.setAttribute("download", `leads_${Date.now()}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -606,61 +621,61 @@ function AdminDashboard({
     className: "flex items-center space-x-2"
   }, /*#__PURE__*/React.createElement("h1", {
     className: "text-xl sm:text-2xl font-black text-slate-900 dark:text-white"
-  }, "\u0410\u0434\u043C\u0456\u043D-\u043F\u0430\u043D\u0435\u043B\u044C: ", config.businessName), /*#__PURE__*/React.createElement("span", {
+  }, t.adminTitle, ": ", config.businessName), /*#__PURE__*/React.createElement("span", {
     className: "text-xs bg-emerald-500/10 text-emerald-600 font-semibold px-2 py-0.5 rounded-full border border-emerald-500/20"
   }, "Live CRM")), /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-slate-500 dark:text-slate-400 mt-0.5"
-  }, "\u0412\u0441\u0456 \u043B\u0456\u0434\u0438 \u0430\u0432\u0442\u043E\u043C\u0430\u0442\u0438\u0447\u043D\u043E \u0437\u0431\u0435\u0440\u0456\u0433\u0430\u044E\u0442\u044C\u0441\u044F \u0432 \u043F\u0430\u043C'\u044F\u0442\u0456 \u0431\u0440\u0430\u0443\u0437\u0435\u0440\u0430 (LocalStorage)"))), /*#__PURE__*/React.createElement("div", {
+  }, t.adminSubtitle))), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-2 flex-wrap"
   }, /*#__PURE__*/React.createElement("button", {
     onClick: onAddSampleOrder,
     className: "px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold text-xs transition active:scale-95 flex items-center space-x-1"
-  }, /*#__PURE__*/React.createElement("span", null, "\u2795 \u0422\u0435\u0441\u0442\u043E\u0432\u0438\u0439 \u043B\u0456\u0434")), /*#__PURE__*/React.createElement("button", {
+  }, /*#__PURE__*/React.createElement("span", null, t.addTestLead)), /*#__PURE__*/React.createElement("button", {
     onClick: handleExportCSV,
     className: "px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 font-bold text-xs transition active:scale-95 flex items-center space-x-1",
-    title: "\u0417\u0430\u0432\u0430\u043D\u0442\u0430\u0436\u0438\u0442\u0438 \u0442\u0430\u0431\u043B\u0438\u0446\u044E \u0432 Excel/CSV"
-  }, /*#__PURE__*/React.createElement("span", null, "\uD83D\uDCE5 \u0415\u043A\u0441\u043F\u043E\u0440\u0442 \u0432 CSV")), /*#__PURE__*/React.createElement("button", {
+    title: "Download CSV"
+  }, /*#__PURE__*/React.createElement("span", null, t.exportCsv)), /*#__PURE__*/React.createElement("button", {
     onClick: onResetOrders,
     className: "px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-rose-600 text-xs font-semibold transition active:scale-95"
-  }, "\uD83D\uDD04 \u0421\u043A\u0438\u043D\u0443\u0442\u0438 \u0431\u0430\u0437\u0443"))), /*#__PURE__*/React.createElement("div", {
+  }, t.resetDb))), /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
   }, /*#__PURE__*/React.createElement("div", {
     className: "bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-xs font-bold uppercase text-slate-400"
-  }, "\u0423\u0441\u044C\u043E\u0433\u043E \u0437\u0430\u044F\u0432\u043E\u043A"), /*#__PURE__*/React.createElement("div", {
+  }, t.totalLeads), /*#__PURE__*/React.createElement("div", {
     className: "mt-2 text-3xl font-black text-slate-900 dark:text-white"
   }, orders.length), /*#__PURE__*/React.createElement("div", {
     className: "text-[11px] text-amber-500 mt-1 font-medium"
-  }, newCount, " \u043E\u0447\u0456\u043A\u0443\u044E\u0442\u044C \u043F\u0456\u0434\u0442\u0432\u0435\u0440\u0434\u0436\u0435\u043D\u043D\u044F")), /*#__PURE__*/React.createElement("div", {
+  }, newCount, " ", t.pendingReview)), /*#__PURE__*/React.createElement("div", {
     className: "bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-xs font-bold uppercase text-slate-400"
-  }, "\u041E\u0447\u0456\u043A\u0443\u0432\u0430\u043D\u0438\u0439 \u0434\u043E\u0445\u0456\u0434"), /*#__PURE__*/React.createElement("div", {
+  }, t.expectedRevenue), /*#__PURE__*/React.createElement("div", {
     className: "mt-2 text-3xl font-black text-emerald-600"
-  }, totalRevenue.toLocaleString(), " ", config.currency || "грн"), /*#__PURE__*/React.createElement("div", {
+  }, totalRevenue.toLocaleString(), " ", config.currency || "€"), /*#__PURE__*/React.createElement("div", {
     className: "text-[11px] text-slate-400 mt-1"
-  }, "\u0410\u043A\u0442\u0438\u0432\u043D\u0456 \u0431\u0440\u043E\u043D\u044E\u0432\u0430\u043D\u043D\u044F")), /*#__PURE__*/React.createElement("div", {
+  }, t.activeBookings)), /*#__PURE__*/React.createElement("div", {
     className: "bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-xs font-bold uppercase text-slate-400"
-  }, "\u0421\u0435\u0440\u0435\u0434\u043D\u0456\u0439 \u0447\u0435\u043A"), /*#__PURE__*/React.createElement("div", {
+  }, t.averageCheck), /*#__PURE__*/React.createElement("div", {
     className: "mt-2 text-3xl font-black text-slate-900 dark:text-white"
-  }, orders.length ? Math.round(totalRevenue / (orders.filter(o => o.status !== 'cancelled').length || 1)) : 0, " ", config.currency || "грн"), /*#__PURE__*/React.createElement("div", {
+  }, orders.length ? Math.round(totalRevenue / (orders.filter(o => o.status !== 'cancelled').length || 1)) : 0, " ", config.currency || "€"), /*#__PURE__*/React.createElement("div", {
     className: "text-[11px] text-slate-400 mt-1"
-  }, "\u041D\u0430 \u043E\u0434\u043D\u043E\u0433\u043E \u043A\u043B\u0456\u0454\u043D\u0442\u0430")), /*#__PURE__*/React.createElement("div", {
+  }, t.perClient)), /*#__PURE__*/React.createElement("div", {
     className: "bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-xs font-bold uppercase text-slate-400"
-  }, "\u0412\u043E\u0440\u043E\u043D\u043A\u0430 \u0441\u0442\u0430\u0442\u0443\u0441\u0456\u0432"), /*#__PURE__*/React.createElement("div", {
+  }, t.statusFunnel), /*#__PURE__*/React.createElement("div", {
     className: "mt-2 flex items-center justify-between text-xs font-semibold"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-amber-500"
-  }, "\uD83D\uDFE1 ", newCount, " \u043D\u043E\u0432."), /*#__PURE__*/React.createElement("span", {
+  }, "\uD83D\uDFE1 ", newCount), /*#__PURE__*/React.createElement("span", {
     className: "text-sky-500"
-  }, "\uD83D\uDD35 ", confirmedCount, " \u043F\u0456\u0434\u0442\u0432."), /*#__PURE__*/React.createElement("span", {
+  }, "\uD83D\uDD35 ", confirmedCount), /*#__PURE__*/React.createElement("span", {
     className: "text-emerald-500"
-  }, "\uD83D\uDFE2 ", completedCount, " \u0432\u0438\u043A\u043E\u043D.")), /*#__PURE__*/React.createElement("div", {
+  }, "\uD83D\uDFE2 ", completedCount)), /*#__PURE__*/React.createElement("div", {
     className: "w-full bg-slate-100 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden mt-3 flex"
   }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -687,25 +702,25 @@ function AdminDashboard({
     type: "text",
     value: search,
     onChange: e => setSearch(e.target.value),
-    placeholder: "\u041F\u043E\u0448\u0443\u043A \u0437\u0430 \u043A\u043B\u0456\u0454\u043D\u0442\u043E\u043C, \u043D\u043E\u043C\u0435\u0440\u043E\u043C, \u043F\u043E\u0441\u043B\u0443\u0433\u043E\u044E \u0430\u0431\u043E \u0442\u0435\u043B\u0435\u0444\u043E\u043D\u043E\u043C...",
+    placeholder: t.searchPlaceholder,
     className: "w-full pl-8 pr-4 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white"
   })), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center space-x-1 overflow-x-auto scrollbar-none"
   }, [{
     id: "all",
-    label: "Всі"
+    label: t.filterAll
   }, {
     id: "new",
-    label: "🟡 Нові"
+    label: t.filterNew
   }, {
     id: "confirmed",
-    label: "🔵 Підтверджені"
+    label: t.filterConfirmed
   }, {
     id: "completed",
-    label: "🟢 Виконані"
+    label: t.filterCompleted
   }, {
     id: "cancelled",
-    label: "🔴 Скасовані"
+    label: t.filterCancelled
   }].map(f => /*#__PURE__*/React.createElement("button", {
     key: f.id,
     onClick: () => setFilter(f.id),
@@ -720,19 +735,19 @@ function AdminDashboard({
     className: "border-b border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/80 text-[11px] font-bold uppercase text-slate-500"
   }, /*#__PURE__*/React.createElement("th", {
     className: "py-3.5 px-4 sm:px-6"
-  }, "ID & \u0421\u0442\u0432\u043E\u0440\u0435\u043D\u043E"), /*#__PURE__*/React.createElement("th", {
+  }, t.thIdTime), /*#__PURE__*/React.createElement("th", {
     className: "py-3.5 px-4"
-  }, "\u041A\u043B\u0456\u0454\u043D\u0442 & \u0422\u0435\u043B\u0435\u0444\u043E\u043D"), /*#__PURE__*/React.createElement("th", {
+  }, t.thClientPhone), /*#__PURE__*/React.createElement("th", {
     className: "py-3.5 px-4"
-  }, "\u041F\u043E\u0441\u043B\u0443\u0433\u0430"), /*#__PURE__*/React.createElement("th", {
+  }, t.thService), /*#__PURE__*/React.createElement("th", {
     className: "py-3.5 px-4"
-  }, "\u0414\u0430\u0442\u0430 \u0437\u0430\u043F\u0438\u0441\u0443"), /*#__PURE__*/React.createElement("th", {
+  }, t.thDate), /*#__PURE__*/React.createElement("th", {
     className: "py-3.5 px-4"
-  }, "\u0421\u0443\u043C\u0430"), /*#__PURE__*/React.createElement("th", {
+  }, t.thPrice), /*#__PURE__*/React.createElement("th", {
     className: "py-3.5 px-4"
-  }, "\u0421\u0442\u0430\u0442\u0443\u0441"), /*#__PURE__*/React.createElement("th", {
+  }, t.thStatus), /*#__PURE__*/React.createElement("th", {
     className: "py-3.5 px-4 sm:px-6 text-right"
-  }, "\u0414\u0456\u0457"))), /*#__PURE__*/React.createElement("tbody", {
+  }, t.thActions))), /*#__PURE__*/React.createElement("tbody", {
     className: "divide-y divide-slate-100 dark:divide-slate-700/60"
   }, filtered.map(order => /*#__PURE__*/React.createElement("tr", {
     key: order.id,
@@ -743,10 +758,10 @@ function AdminDashboard({
     className: "font-mono font-bold bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded text-[11px] text-slate-700 dark:text-slate-300"
   }, order.id), /*#__PURE__*/React.createElement("div", {
     className: "text-[10px] text-slate-400 mt-1"
-  }, order.createdAt ? new Date(order.createdAt).toLocaleTimeString('uk-UA', {
+  }, order.createdAt ? new Date(order.createdAt).toLocaleTimeString([], {
     hour: '2-digit',
     minute: '2-digit'
-  }) : 'Щойно')), /*#__PURE__*/React.createElement("td", {
+  }) : 'Adesso')), /*#__PURE__*/React.createElement("td", {
     className: "py-4 px-4 whitespace-nowrap"
   }, /*#__PURE__*/React.createElement("div", {
     className: "font-bold text-slate-900 dark:text-white"
@@ -767,9 +782,9 @@ function AdminDashboard({
     className: "font-bold text-slate-900 dark:text-white"
   }, order.date), /*#__PURE__*/React.createElement("span", {
     className: "text-[11px] text-primary font-semibold"
-  }, "\u043E ", order.time)), /*#__PURE__*/React.createElement("td", {
+  }, order.time)), /*#__PURE__*/React.createElement("td", {
     className: "py-4 px-4 whitespace-nowrap font-black text-slate-900 dark:text-white"
-  }, order.price, " ", order.currency || "грн"), /*#__PURE__*/React.createElement("td", {
+  }, order.price, " ", order.currency || "€"), /*#__PURE__*/React.createElement("td", {
     className: "py-4 px-4 whitespace-nowrap"
   }, /*#__PURE__*/React.createElement("select", {
     value: order.status,
@@ -777,30 +792,30 @@ function AdminDashboard({
     className: "text-xs font-bold rounded-xl px-2.5 py-1.5 border cursor-pointer bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-100"
   }, /*#__PURE__*/React.createElement("option", {
     value: "new"
-  }, "\uD83D\uDFE1 \u041D\u043E\u0432\u0438\u0439"), /*#__PURE__*/React.createElement("option", {
+  }, t.statusNew), /*#__PURE__*/React.createElement("option", {
     value: "confirmed"
-  }, "\uD83D\uDD35 \u041F\u0456\u0434\u0442\u0432\u0435\u0440\u0434\u0436\u0435\u043D\u043E"), /*#__PURE__*/React.createElement("option", {
+  }, t.statusConfirmed), /*#__PURE__*/React.createElement("option", {
     value: "completed"
-  }, "\uD83D\uDFE2 \u0412\u0438\u043A\u043E\u043D\u0430\u043D\u043E"), /*#__PURE__*/React.createElement("option", {
+  }, t.statusCompleted), /*#__PURE__*/React.createElement("option", {
     value: "cancelled"
-  }, "\uD83D\uDD34 \u0421\u043A\u0430\u0441\u043E\u0432\u0430\u043D\u043E"))), /*#__PURE__*/React.createElement("td", {
+  }, t.statusCancelled))), /*#__PURE__*/React.createElement("td", {
     className: "py-4 px-4 sm:px-6 text-right whitespace-nowrap"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center justify-end space-x-1.5"
   }, /*#__PURE__*/React.createElement("a", {
     href: `tel:${order.clientPhone}`,
     className: "p-1.5 text-slate-400 hover:text-emerald-500 rounded-lg hover:bg-slate-100 transition",
-    title: "\u041F\u043E\u0434\u0437\u0432\u043E\u043D\u0438\u0442\u0438"
+    title: t.call
   }, "\uD83D\uDCDE"), /*#__PURE__*/React.createElement("button", {
     onClick: () => {
-      if (confirm(`Видалити запис ${order.id} клієнта ${order.clientName}?`)) onDeleteOrder(order.id);
+      if (confirm(`${t.deleteConfirm} ${order.id}?`)) onDeleteOrder(order.id);
     },
     className: "p-1.5 text-slate-400 hover:text-rose-500 rounded-lg hover:bg-slate-100 transition",
-    title: "\u0412\u0438\u0434\u0430\u043B\u0438\u0442\u0438"
+    title: "Delete"
   }, "\uD83D\uDDD1\uFE0F"))))), filtered.length === 0 && /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", {
     colSpan: "7",
     className: "py-12 text-center text-slate-400"
-  }, "\u041D\u0435 \u0437\u043D\u0430\u0439\u0434\u0435\u043D\u043E \u0436\u043E\u0434\u043D\u043E\u0433\u043E \u0437\u0430\u043C\u043E\u0432\u043B\u0435\u043D\u043D\u044F \u0437\u0430 \u0432\u043A\u0430\u0437\u0430\u043D\u0438\u043C\u0438 \u0444\u0456\u043B\u044C\u0442\u0440\u0430\u043C\u0438")))))));
+  }, t.noOrdersFound)))))));
 }
 
 // --- 6. WhiteLabelDemo Component ---
@@ -809,37 +824,34 @@ function WhiteLabelDemo({
   onSelectPreset,
   onCustomUpdate,
   isOpen,
-  onClose
+  onClose,
+  t
 }) {
   if (!isOpen) return null;
-  const [tempName, setTempName] = useState(currentConfig.businessName);
-  const [tempCategory, setTempCategory] = useState(currentConfig.category);
-  const [tempPrimary, setTempPrimary] = useState(currentConfig.primaryColor);
-  const [tempAccent, setTempAccent] = useState(currentConfig.accentColor);
   const presets = [{
     id: "beautySalon",
-    name: "Салон краси & SPA",
+    name: "Salone di Bellezza & SPA",
     brand: "Luxe Studio",
     icon: "💅",
     colors: ["#7c3aed", "#db2777"],
     data: businessPresets.beautySalon
   }, {
     id: "barberShop",
-    name: "Чоловічий барбершоп",
+    name: "Barbershop Uomo",
     brand: "Blade & Barber",
     icon: "💈",
     colors: ["#d97706", "#334155"],
     data: businessPresets.barberShop
   }, {
     id: "autoDetailing",
-    name: "Детейлінг & Автосервіс",
+    name: "Detailing & Auto Spa",
     brand: "Apex Auto Spa",
     icon: "🚗",
     colors: ["#0284c7", "#ef4444"],
     data: businessPresets.autoDetailing
   }, {
     id: "coffeeRoastery",
-    name: "Кав'ярня третьої хвилі",
+    name: "Caffetteria Artigianale",
     brand: "Kava Craft",
     icon: "☕",
     colors: ["#92400e", "#ea580c"],
@@ -853,9 +865,9 @@ function WhiteLabelDemo({
     className: "flex justify-between items-center pb-4 border-b border-slate-100 dark:border-slate-800"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h3", {
     className: "text-base font-black text-slate-900 dark:text-white"
-  }, "White-Label \u041A\u043E\u043D\u0444\u0456\u0433\u0443\u0440\u0430\u0442\u043E\u0440"), /*#__PURE__*/React.createElement("p", {
+  }, t.whiteLabelPresets), /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-slate-500"
-  }, "\u041C\u0438\u0442\u0442\u0454\u0432\u0435 \u043F\u0435\u0440\u0435\u043C\u0438\u043A\u0430\u043D\u043D\u044F \u043D\u0456\u0448\u0456 \u0430\u0431\u043E \u043A\u043E\u043B\u044C\u043E\u0440\u0456\u0432")), /*#__PURE__*/React.createElement("button", {
+  }, "Demo rapida delle nicchie disponibili")), /*#__PURE__*/React.createElement("button", {
     onClick: onClose,
     className: "text-slate-400 hover:text-white"
   }, "\u2715")), /*#__PURE__*/React.createElement("div", {
@@ -873,91 +885,559 @@ function WhiteLabelDemo({
     className: "font-bold text-sm text-slate-900 dark:text-white"
   }, p.brand), /*#__PURE__*/React.createElement("div", {
     className: "text-xs text-slate-500"
-  }, p.name)))), /*#__PURE__*/React.createElement("div", {
-    className: "pt-3 border-t border-slate-100 dark:border-slate-800 space-y-3"
-  }, /*#__PURE__*/React.createElement("label", {
-    className: "block text-xs font-bold uppercase text-slate-500"
-  }, "\u0428\u0432\u0438\u0434\u043A\u0430 \u0437\u043C\u0456\u043D\u0430 \u043A\u043E\u043B\u044C\u043E\u0440\u0456\u0432 \u043D\u0430\u0436\u0438\u0432\u043E"), /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-2 gap-3"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center space-x-2"
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "color",
-    value: tempPrimary,
-    onChange: e => {
-      setTempPrimary(e.target.value);
-      onCustomUpdate({
-        primaryColor: e.target.value
-      });
-    },
-    className: "w-8 h-8 rounded cursor-pointer"
-  }), /*#__PURE__*/React.createElement("span", {
-    className: "text-xs font-mono"
-  }, tempPrimary)), /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center space-x-2"
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "color",
-    value: tempAccent,
-    onChange: e => {
-      setTempAccent(e.target.value);
-      onCustomUpdate({
-        accentColor: e.target.value
-      });
-    },
-    className: "w-8 h-8 rounded cursor-pointer"
-  }), /*#__PURE__*/React.createElement("span", {
-    className: "text-xs font-mono"
-  }, tempAccent)))), /*#__PURE__*/React.createElement("p", {
+  }, p.name)))), /*#__PURE__*/React.createElement("p", {
     className: "text-[11px] text-center text-slate-400 mt-4"
-  }, "\uD83D\uDCA1 \u0413\u043E\u043B\u043E\u0432\u043D\u0438\u0439 \u0444\u0430\u0439\u043B \u043D\u0430\u043B\u0430\u0448\u0442\u0443\u0432\u0430\u043D\u044C: ", /*#__PURE__*/React.createElement("code", {
+  }, "\uD83D\uDCA1 Configurazione modificabile in: ", /*#__PURE__*/React.createElement("code", {
     className: "text-primary font-bold"
   }, "src/config.js"))));
 }
 
+// --- 7. CreatorStudio Component ---
+function CreatorStudio({
+  config,
+  onSaveConfig,
+  onResetToDefault,
+  t,
+  lang
+}) {
+  const [activeTab, setActiveTab] = useState("branding");
+  const [form, setForm] = useState({
+    businessName: config.businessName || "",
+    category: config.category || "",
+    tagline: config.tagline || "",
+    rating: config.rating || 4.95,
+    reviewsCount: config.reviewsCount || 120,
+    logoUrl: config.logoUrl || "",
+    coverUrl: config.coverUrl || "",
+    primaryColor: config.primaryColor || "#7c3aed",
+    accentColor: config.accentColor || "#db2777",
+    currency: config.currency || "€",
+    contact: {
+      phone: config.contact?.phone || "",
+      address: config.contact?.address || "",
+      workingHours: config.contact?.workingHours || "",
+      instagram: config.contact?.instagram || "",
+      telegramBot: config.contact?.telegramBot || ""
+    },
+    services: config.services ? [...config.services] : []
+  });
+  const [toastMessage, setToastMessage] = useState("");
+  const [editingIndex, setEditingIndex] = useState(null);
+  const [serviceModal, setServiceModal] = useState(false);
+  const [srvForm, setSrvForm] = useState({
+    id: "",
+    name: "",
+    category: "",
+    price: 50,
+    duration: "45 min",
+    description: "",
+    popular: false
+  });
+  const palettes = [{
+    name: "Luxe Violet & Pink",
+    primary: "#7c3aed",
+    accent: "#db2777"
+  }, {
+    name: "Blade Amber & Slate",
+    primary: "#d97706",
+    accent: "#334155"
+  }, {
+    name: "Apex Sky & Red",
+    primary: "#0284c7",
+    accent: "#ef4444"
+  }, {
+    name: "Bio Emerald & Gold",
+    primary: "#059669",
+    accent: "#d97706"
+  }, {
+    name: "Coffee Warm & Orange",
+    primary: "#92400e",
+    accent: "#ea580c"
+  }];
+  const showToast = msg => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(""), 3000);
+  };
+  const handleApply = () => {
+    onSaveConfig(form);
+    showToast(t.changesAppliedToast);
+  };
+  const handleSaveService = e => {
+    e.preventDefault();
+    if (!srvForm.name.trim()) return;
+    const list = [...form.services];
+    if (editingIndex !== null) {
+      list[editingIndex] = srvForm;
+    } else {
+      list.push(srvForm);
+    }
+    setForm({
+      ...form,
+      services: list
+    });
+    setServiceModal(false);
+  };
+  const generateCode = () => {
+    return `export const businessConfig = ${JSON.stringify(form, null, 2)};\n`;
+  };
+  return /*#__PURE__*/React.createElement("div", {
+    className: "max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6 font-sans animate-fade-in"
+  }, toastMessage && /*#__PURE__*/React.createElement("div", {
+    className: "fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl border border-emerald-500/40 flex items-center space-x-2 animate-bounce-in"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-emerald-400"
+  }, "\u2713"), /*#__PURE__*/React.createElement("span", {
+    className: "text-xs font-bold"
+  }, toastMessage)), /*#__PURE__*/React.createElement("div", {
+    className: "bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-6 sm:p-8 rounded-3xl shadow-xl border border-indigo-500/30 relative overflow-hidden"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center space-x-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-400 to-amber-600 flex items-center justify-center text-slate-950 font-black text-2xl shadow-lg"
+  }, "\uD83D\uDC51"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center space-x-2"
+  }, /*#__PURE__*/React.createElement("h1", {
+    className: "text-xl sm:text-2xl font-black tracking-tight"
+  }, t.creatorStudioTitle), /*#__PURE__*/React.createElement("span", {
+    className: "text-[10px] bg-amber-400/20 text-amber-300 font-bold px-2 py-0.5 rounded-full border border-amber-400/30 uppercase"
+  }, "Master Panel")), /*#__PURE__*/React.createElement("p", {
+    className: "text-xs text-slate-300 mt-1 max-w-xl"
+  }, t.creatorStudioSubtitle))), /*#__PURE__*/React.createElement("button", {
+    onClick: handleApply,
+    className: "px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 text-slate-950 font-black text-xs shadow-lg transition active:scale-95"
+  }, "\uD83D\uDCBE ", t.saveCreatorChangesBtn)), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center space-x-2 mt-6 pt-4 border-t border-white/10 overflow-x-auto scrollbar-none"
+  }, [{
+    id: "branding",
+    icon: "🏢",
+    label: t.tabBranding
+  }, {
+    id: "colors",
+    icon: "🎨",
+    label: t.tabColorsStyle
+  }, {
+    id: "services",
+    icon: "✂️",
+    label: `${t.tabServices} (${form.services.length})`
+  }, {
+    id: "export",
+    icon: "💾",
+    label: t.tabExportCode
+  }].map(tab => /*#__PURE__*/React.createElement("button", {
+    key: tab.id,
+    onClick: () => setActiveTab(tab.id),
+    className: `px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-1.5 whitespace-nowrap ${activeTab === tab.id ? "bg-white text-slate-900 shadow-md" : "bg-white/10 text-white/80 hover:bg-white/20"}`
+  }, /*#__PURE__*/React.createElement("span", null, tab.icon), /*#__PURE__*/React.createElement("span", null, tab.label))))), activeTab === "branding" && /*#__PURE__*/React.createElement("div", {
+    className: "bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 grid grid-cols-1 md:grid-cols-2 gap-6"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "block text-xs font-bold uppercase text-slate-500 mb-1"
+  }, t.fieldBusinessName), /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    value: form.businessName,
+    onChange: e => setForm({
+      ...form,
+      businessName: e.target.value
+    }),
+    className: "w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white"
+  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "block text-xs font-bold uppercase text-slate-500 mb-1"
+  }, t.fieldCategory), /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    value: form.category,
+    onChange: e => setForm({
+      ...form,
+      category: e.target.value
+    }),
+    className: "w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white"
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "md:col-span-2"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "block text-xs font-bold uppercase text-slate-500 mb-1"
+  }, t.fieldTagline), /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    value: form.tagline,
+    onChange: e => setForm({
+      ...form,
+      tagline: e.target.value
+    }),
+    className: "w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white"
+  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "block text-xs font-bold uppercase text-slate-500 mb-1"
+  }, t.fieldLogoUrl), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center space-x-3"
+  }, /*#__PURE__*/React.createElement("img", {
+    src: form.logoUrl,
+    alt: "Logo",
+    className: "w-10 h-10 rounded-xl object-cover border",
+    onError: e => {
+      e.target.src = "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=150";
+    }
+  }), /*#__PURE__*/React.createElement("input", {
+    type: "url",
+    value: form.logoUrl,
+    onChange: e => setForm({
+      ...form,
+      logoUrl: e.target.value
+    }),
+    className: "flex-1 px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900"
+  }))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "block text-xs font-bold uppercase text-slate-500 mb-1"
+  }, t.fieldCoverUrl), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center space-x-3"
+  }, /*#__PURE__*/React.createElement("img", {
+    src: form.coverUrl,
+    alt: "Cover",
+    className: "w-14 h-10 rounded-xl object-cover border",
+    onError: e => {
+      e.target.src = "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=300";
+    }
+  }), /*#__PURE__*/React.createElement("input", {
+    type: "url",
+    value: form.coverUrl,
+    onChange: e => setForm({
+      ...form,
+      coverUrl: e.target.value
+    }),
+    className: "flex-1 px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900"
+  }))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "block text-xs font-bold uppercase text-slate-500 mb-1"
+  }, t.fieldPhone), /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    value: form.contact.phone,
+    onChange: e => setForm({
+      ...form,
+      contact: {
+        ...form.contact,
+        phone: e.target.value
+      }
+    }),
+    className: "w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900"
+  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "block text-xs font-bold uppercase text-slate-500 mb-1"
+  }, t.fieldAddress), /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    value: form.contact.address,
+    onChange: e => setForm({
+      ...form,
+      contact: {
+        ...form.contact,
+        address: e.target.value
+      }
+    }),
+    className: "w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900"
+  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "block text-xs font-bold uppercase text-slate-500 mb-1"
+  }, t.fieldWorkingHours), /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    value: form.contact.workingHours,
+    onChange: e => setForm({
+      ...form,
+      contact: {
+        ...form.contact,
+        workingHours: e.target.value
+      }
+    }),
+    className: "w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900"
+  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "block text-xs font-bold uppercase text-slate-500 mb-1"
+  }, t.fieldCurrency), /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    value: form.currency,
+    onChange: e => setForm({
+      ...form,
+      currency: e.target.value
+    }),
+    className: "w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900"
+  }))), activeTab === "colors" && /*#__PURE__*/React.createElement("div", {
+    className: "bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 space-y-6"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-2 sm:grid-cols-3 gap-3"
+  }, palettes.map((p, i) => /*#__PURE__*/React.createElement("button", {
+    key: i,
+    onClick: () => setForm({
+      ...form,
+      primaryColor: p.primary,
+      accentColor: p.accent
+    }),
+    className: "p-3 rounded-2xl border text-left flex items-center justify-between hover:border-slate-400 bg-slate-50 dark:bg-slate-850"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-xs font-bold text-slate-800 dark:text-slate-200"
+  }, p.name), /*#__PURE__*/React.createElement("div", {
+    className: "flex space-x-1.5"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "w-4 h-4 rounded-full",
+    style: {
+      backgroundColor: p.primary
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "w-4 h-4 rounded-full",
+    style: {
+      backgroundColor: p.accent
+    }
+  }))))), /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-2 gap-6 pt-4 border-t border-slate-100 dark:border-slate-700"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "block text-xs font-bold uppercase text-slate-500 mb-2"
+  }, t.fieldPrimaryColor), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center space-x-3"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "color",
+    value: form.primaryColor,
+    onChange: e => setForm({
+      ...form,
+      primaryColor: e.target.value
+    }),
+    className: "w-12 h-12 rounded-xl cursor-pointer"
+  }), /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    value: form.primaryColor,
+    onChange: e => setForm({
+      ...form,
+      primaryColor: e.target.value
+    }),
+    className: "w-28 px-3 py-2 text-xs font-mono rounded-xl border"
+  }))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: "block text-xs font-bold uppercase text-slate-500 mb-2"
+  }, t.fieldAccentColor), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center space-x-3"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "color",
+    value: form.accentColor,
+    onChange: e => setForm({
+      ...form,
+      accentColor: e.target.value
+    }),
+    className: "w-12 h-12 rounded-xl cursor-pointer"
+  }), /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    value: form.accentColor,
+    onChange: e => setForm({
+      ...form,
+      accentColor: e.target.value
+    }),
+    className: "w-28 px-3 py-2 text-xs font-mono rounded-xl border"
+  }))))), activeTab === "services" && /*#__PURE__*/React.createElement("div", {
+    className: "bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 space-y-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex justify-between items-center"
+  }, /*#__PURE__*/React.createElement("h3", {
+    className: "font-bold text-base text-slate-900 dark:text-white"
+  }, t.servicesManagerTitle), /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      setEditingIndex(null);
+      setSrvForm({
+        id: "srv-" + Date.now(),
+        name: "",
+        category: "Generale",
+        price: 50,
+        duration: "45 min",
+        description: "",
+        popular: false
+      });
+      setServiceModal(true);
+    },
+    className: "px-4 py-2 rounded-xl bg-primary text-white font-bold text-xs"
+  }, t.addNewServiceBtn)), /*#__PURE__*/React.createElement("div", {
+    className: "space-y-3 pt-2"
+  }, form.services.map((srv, idx) => /*#__PURE__*/React.createElement("div", {
+    key: srv.id || idx,
+    className: "p-4 rounded-2xl bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-700 flex justify-between items-center"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center space-x-2"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700"
+  }, srv.category), srv.popular && /*#__PURE__*/React.createElement("span", {
+    className: "text-[10px] text-amber-500 font-bold"
+  }, "\uD83D\uDD25 Top")), /*#__PURE__*/React.createElement("h4", {
+    className: "font-bold text-sm text-slate-900 dark:text-white mt-1"
+  }, srv.name), /*#__PURE__*/React.createElement("p", {
+    className: "text-xs text-slate-500"
+  }, srv.description)), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center space-x-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "text-right"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "font-black text-sm"
+  }, srv.price, " ", form.currency), /*#__PURE__*/React.createElement("span", {
+    className: "text-xs text-slate-400"
+  }, "\u23F1\uFE0F ", srv.duration)), /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      setEditingIndex(idx);
+      setSrvForm({
+        ...srv
+      });
+      setServiceModal(true);
+    },
+    className: "p-1.5 text-slate-400 hover:text-white"
+  }, "\u270F\uFE0F"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setForm({
+      ...form,
+      services: form.services.filter((_, i) => i !== idx)
+    }),
+    className: "p-1.5 text-slate-400 hover:text-rose-500"
+  }, "\uD83D\uDDD1\uFE0F")))))), activeTab === "export" && /*#__PURE__*/React.createElement("div", {
+    className: "bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 space-y-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex gap-3"
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      navigator.clipboard?.writeText(generateCode());
+      showToast(t.configCodeCopied);
+    },
+    className: "px-4 py-2.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 font-bold text-xs"
+  }, "\uD83D\uDCCB ", t.copyConfigBtn), /*#__PURE__*/React.createElement("button", {
+    onClick: onResetToDefault,
+    className: "px-4 py-2.5 rounded-xl border text-xs font-semibold text-slate-500"
+  }, t.resetToDefaultConfig)), /*#__PURE__*/React.createElement("pre", {
+    className: "p-4 bg-slate-950 text-slate-200 rounded-2xl font-mono text-xs overflow-x-auto max-h-80 border border-slate-800 select-all"
+  }, generateCode())), serviceModal && /*#__PURE__*/React.createElement("div", {
+    className: "fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fade-in font-sans"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border p-6 space-y-3"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex justify-between items-center pb-2 border-b"
+  }, /*#__PURE__*/React.createElement("h3", {
+    className: "font-bold text-base text-slate-900 dark:text-white"
+  }, editingIndex !== null ? t.editServiceTitle : t.newServiceTitle), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setServiceModal(false)
+  }, "\u2715")), /*#__PURE__*/React.createElement("form", {
+    onSubmit: handleSaveService,
+    className: "space-y-3 text-xs"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    required: true,
+    placeholder: t.serviceName,
+    value: srvForm.name,
+    onChange: e => setSrvForm({
+      ...srvForm,
+      name: e.target.value
+    }),
+    className: "w-full px-3 py-2 rounded-xl border bg-slate-50 dark:bg-slate-800"
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-2 gap-2"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    required: true,
+    placeholder: t.serviceCategory,
+    value: srvForm.category,
+    onChange: e => setSrvForm({
+      ...srvForm,
+      category: e.target.value
+    }),
+    className: "w-full px-3 py-2 rounded-xl border bg-slate-50 dark:bg-slate-800"
+  }), /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    required: true,
+    placeholder: t.servicePrice,
+    value: srvForm.price,
+    onChange: e => setSrvForm({
+      ...srvForm,
+      price: Number(e.target.value)
+    }),
+    className: "w-full px-3 py-2 rounded-xl border bg-slate-50 dark:bg-slate-800"
+  })), /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    placeholder: t.serviceDuration,
+    value: srvForm.duration,
+    onChange: e => setSrvForm({
+      ...srvForm,
+      duration: e.target.value
+    }),
+    className: "w-full px-3 py-2 rounded-xl border bg-slate-50 dark:bg-slate-800"
+  }), /*#__PURE__*/React.createElement("textarea", {
+    placeholder: t.serviceDescription,
+    value: srvForm.description,
+    onChange: e => setSrvForm({
+      ...srvForm,
+      description: e.target.value
+    }),
+    className: "w-full px-3 py-2 rounded-xl border bg-slate-50 dark:bg-slate-800"
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center space-x-2"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "checkbox",
+    id: "pop",
+    checked: srvForm.popular,
+    onChange: e => setSrvForm({
+      ...srvForm,
+      popular: e.target.checked
+    })
+  }), /*#__PURE__*/React.createElement("label", {
+    htmlFor: "pop"
+  }, t.servicePopular)), /*#__PURE__*/React.createElement("div", {
+    className: "flex gap-2 pt-2"
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "submit",
+    className: "flex-1 py-2.5 rounded-xl bg-primary text-white font-bold"
+  }, t.saveServiceBtn), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    onClick: () => setServiceModal(false),
+    className: "px-4 py-2.5 rounded-xl border"
+  }, t.cancelBtn))))));
+}
+
 // --- Main Application Controller ---
 function MainApp() {
+  // Navigation mode: "customer" | "admin" | "creator"
   const [tab, setTab] = useState("customer");
   const [fullWidth, setFullWidth] = useState(false);
-  const [cfg, setCfg] = useState(businessConfig);
+
+  // Active Language: "it" | "en" | "uk" (default to IT as requested)
+  const [lang, setLang] = useState(() => {
+    try {
+      return localStorage.getItem("businesskit_lang") || "it";
+    } catch (e) {
+      return "it";
+    }
+  });
+  const t = translations[lang] || translations.it;
+  const handleSetLang = newLang => {
+    setLang(newLang);
+    try {
+      localStorage.setItem("businesskit_lang", newLang);
+    } catch (e) {}
+  };
+
+  // Active configuration (loads custom saved from localStorage or default businessConfig)
+  const [cfg, setCfg] = useState(() => {
+    try {
+      const saved = localStorage.getItem("businesskit_custom_config");
+      return saved ? JSON.parse(saved) : businessConfig;
+    } catch (e) {
+      return businessConfig;
+    }
+  });
+
+  // Orders in localStorage
   const [orders, setOrders] = useState(() => {
     try {
       const s = localStorage.getItem("businesskit_orders");
       return s ? JSON.parse(s) : [{
         id: "BK-7891",
-        clientName: "Олена Коваленко",
-        clientPhone: "+380 67 111 22 33",
-        serviceName: "Комплексний преміум-манікюр",
-        price: 750,
-        duration: "60 хв",
-        date: "Завтра",
+        clientName: "Marco Rossi",
+        clientPhone: "+39 340 111 22 33",
+        serviceName: "Trattamento Viso & SPA Relax",
+        price: 75,
+        duration: "60 min",
+        date: "Domani",
         time: "14:00",
-        comment: "Прошу нагадати за годину",
+        comment: "Primo appuntamento",
         status: "new",
         createdAt: new Date(Date.now() - 15 * 60000).toISOString()
       }, {
         id: "BK-7890",
-        clientName: "Максим Шевченко",
-        clientPhone: "+380 50 222 33 44",
-        serviceName: "Стрижка та авторське укладання",
-        price: 650,
-        duration: "45 хв",
-        date: "Сьогодні",
+        clientName: "Sofia Bianchi",
+        clientPhone: "+39 349 222 33 44",
+        serviceName: "Taglio & Piega Personalizzata",
+        price: 45,
+        duration: "45 min",
+        date: "Oggi",
         time: "17:30",
         comment: "",
         status: "confirmed",
         createdAt: new Date(Date.now() - 120 * 60000).toISOString()
-      }, {
-        id: "BK-7889",
-        clientName: "Ірина Мельник",
-        clientPhone: "+380 93 444 55 66",
-        serviceName: "SPA-догляд та масаж обличчя",
-        price: 1200,
-        duration: "60 хв",
-        date: "23 вер",
-        time: "11:00",
-        comment: "Чутлива шкіра",
-        status: "completed",
-        createdAt: new Date(Date.now() - 360 * 60000).toISOString()
       }];
     } catch (e) {
       return [];
@@ -976,30 +1456,44 @@ function MainApp() {
     if (cfg.primaryColor) root.style.setProperty('--color-primary', cfg.primaryColor);
     if (cfg.accentColor) root.style.setProperty('--color-accent', cfg.accentColor);
   }, [cfg]);
+  const handleSaveConfig = newCfg => {
+    setCfg(newCfg);
+    try {
+      localStorage.setItem("businesskit_custom_config", JSON.stringify(newCfg));
+    } catch (e) {}
+  };
+  const handleResetToDefault = () => {
+    if (confirm(t.resetConfirm)) {
+      setCfg(businessConfig);
+      try {
+        localStorage.removeItem("businesskit_custom_config");
+      } catch (e) {}
+    }
+  };
   const handleNewBooking = newOrder => {
     setOrders(prev => [newOrder, ...prev]);
     setLastOrder(newOrder);
     setTelegramNotif(newOrder);
   };
   const handleAddSampleOrder = () => {
-    const names = ["Денис Кравчук", "Марія Литвин", "Артем Васильєв", "Світлана Ткач", "Віталій Поліщук"];
+    const names = lang === 'it' ? ["Alessandro Ferrari", "Giulia Romano", "Matteo Colombo", "Chiara Ricci"] : lang === 'uk' ? ["Денис Кравчук", "Марія Литвин", "Артем Васильєв", "Світлана Ткач"] : ["David Miller", "Emily Watson", "James Wilson", "Sarah Davis"];
     const randomName = names[Math.floor(Math.random() * names.length)];
     const srv = cfg.services[Math.floor(Math.random() * cfg.services.length)] || {
-      name: "Індивідуальна консультація",
-      price: 500,
-      duration: "30 хв"
+      name: "Consulenza",
+      price: 50,
+      duration: "30 min"
     };
     handleNewBooking({
       id: "BK-" + Math.floor(1000 + Math.random() * 9000),
       clientName: randomName,
-      clientPhone: `+380 97 ${Math.floor(100 + Math.random() * 900)} ${Math.floor(10 + Math.random() * 90)} ${Math.floor(10 + Math.random() * 90)}`,
+      clientPhone: lang === 'it' ? `+39 34${Math.floor(10000000 + Math.random() * 90000000)}` : `+380 97 ${Math.floor(100 + Math.random() * 900)} ${Math.floor(10 + Math.random() * 90)}`,
       serviceName: srv.name,
       price: srv.price,
-      currency: cfg.currency || "грн",
+      currency: cfg.currency || "€",
       duration: srv.duration,
-      date: "Сьогодні",
+      date: lang === 'it' ? "Oggi" : lang === 'uk' ? "Сьогодні" : "Today",
       time: "16:30",
-      comment: "Тестовий лід для демонстрації",
+      comment: "Lead generato per test",
       status: "new",
       createdAt: new Date().toISOString()
     });
@@ -1022,33 +1516,60 @@ function MainApp() {
     className: "text-[10px] font-bold uppercase bg-primary/10 text-primary px-2 py-0.5 rounded-full border border-primary/20"
   }, "White-Label MVP")), /*#__PURE__*/React.createElement("p", {
     className: "text-[11px] text-slate-500 hidden sm:block"
-  }, "\u041F\u043E\u0442\u043E\u0447\u043D\u0438\u0439 \u0431\u0456\u0437\u043D\u0435\u0441: ", /*#__PURE__*/React.createElement("strong", null, cfg.businessName), " (", cfg.category, ")"))), /*#__PURE__*/React.createElement("div", {
+  }, t.currentBusiness, " ", /*#__PURE__*/React.createElement("strong", null, cfg.businessName), " (", cfg.category, ")"))), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl border border-slate-200 dark:border-slate-700"
   }, /*#__PURE__*/React.createElement("button", {
     onClick: () => setTab("customer"),
-    className: `flex items-center space-x-1.5 px-3 sm:px-4 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition ${tab === "customer" ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm" : "text-slate-500 hover:text-slate-900"}`
-  }, /*#__PURE__*/React.createElement("span", null, "\uD83D\uDCF1"), /*#__PURE__*/React.createElement("span", null, "\u041A\u043B\u0456\u0454\u043D\u0442\u0441\u044C\u043A\u0438\u0439 \u0432\u0456\u0434\u0436\u0435\u0442")), /*#__PURE__*/React.createElement("button", {
-    onClick: () => setTab("admin"),
-    className: `flex items-center space-x-1.5 px-3 sm:px-4 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition ${tab === "admin" ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm" : "text-slate-500 hover:text-slate-900"}`
-  }, /*#__PURE__*/React.createElement("span", null, "\uD83D\uDCBC"), /*#__PURE__*/React.createElement("span", null, "\u0410\u0434\u043C\u0456\u043D-\u043F\u0430\u043D\u0435\u043B\u044C"), orders.filter(o => o.status === 'new').length > 0 && /*#__PURE__*/React.createElement("span", {
-    className: "w-5 h-5 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center shadow-sm"
-  }, orders.filter(o => o.status === 'new').length))), /*#__PURE__*/React.createElement("button", {
-    onClick: () => setWlOpen(true),
-    className: "px-3 py-1.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-500/20 transition active:scale-95 flex items-center space-x-1.5"
-  }, /*#__PURE__*/React.createElement("span", null, "\uD83C\uDFA8"), /*#__PURE__*/React.createElement("span", {
+    className: `flex items-center space-x-1.5 px-3 sm:px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition ${tab === "customer" ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm" : "text-slate-500 hover:text-slate-900"}`
+  }, /*#__PURE__*/React.createElement("span", null, "\uD83D\uDCF1"), /*#__PURE__*/React.createElement("span", {
     className: "hidden md:inline"
-  }, "White-Label \u041A\u043E\u043D\u0444\u0456\u0433")))), /*#__PURE__*/React.createElement("main", {
+  }, t.customerApp)), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setTab("admin"),
+    className: `flex items-center space-x-1.5 px-3 sm:px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition ${tab === "admin" ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm" : "text-slate-500 hover:text-slate-900"}`
+  }, /*#__PURE__*/React.createElement("span", null, "\uD83D\uDCBC"), /*#__PURE__*/React.createElement("span", {
+    className: "hidden md:inline"
+  }, t.adminDashboard), orders.filter(o => o.status === 'new').length > 0 && /*#__PURE__*/React.createElement("span", {
+    className: "w-5 h-5 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center shadow-sm"
+  }, orders.filter(o => o.status === 'new').length)), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setTab("creator"),
+    className: `flex items-center space-x-1.5 px-3 sm:px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition ${tab === "creator" ? "bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-sm" : "text-slate-500 hover:text-amber-500"}`
+  }, /*#__PURE__*/React.createElement("span", null, "\uD83D\uDC51"), /*#__PURE__*/React.createElement("span", {
+    className: "hidden md:inline"
+  }, t.creatorStudio))), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center space-x-2"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center bg-slate-100 dark:bg-slate-800 p-0.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold"
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => handleSetLang("it"),
+    className: `px-2 py-1 rounded-lg transition ${lang === "it" ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm" : "text-slate-400 hover:text-slate-700"}`,
+    title: "Italiano"
+  }, "\uD83C\uDDEE\uD83C\uDDF9 IT"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => handleSetLang("en"),
+    className: `px-2 py-1 rounded-lg transition ${lang === "en" ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm" : "text-slate-400 hover:text-slate-700"}`,
+    title: "English"
+  }, "\uD83C\uDDEC\uD83C\uDDE7 EN"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => handleSetLang("uk"),
+    className: `px-2 py-1 rounded-lg transition ${lang === "uk" ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm" : "text-slate-400 hover:text-slate-700"}`,
+    title: "\u0423\u043A\u0440\u0430\u0457\u043D\u0441\u044C\u043A\u0430"
+  }, "\uD83C\uDDFA\uD83C\uDDE6 UK")), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setWlOpen(true),
+    className: "p-2 sm:px-3 sm:py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition",
+    title: t.whiteLabelPresets
+  }, /*#__PURE__*/React.createElement("span", null, "\uD83C\uDFA8"))))), /*#__PURE__*/React.createElement("main", {
     className: "flex-1"
-  }, tab === "customer" ? /*#__PURE__*/React.createElement(PhoneMockup, {
+  }, tab === "customer" && /*#__PURE__*/React.createElement(PhoneMockup, {
     isFullWidth: fullWidth,
     onToggleViewMode: () => setFullWidth(!fullWidth),
-    businessName: cfg.businessName
+    businessName: cfg.businessName,
+    t: t
   }, /*#__PURE__*/React.createElement(CustomerApp, {
     config: cfg,
     onBookService: handleNewBooking,
     lastOrder: lastOrder,
-    onResetLastOrder: () => setLastOrder(null)
-  })) : /*#__PURE__*/React.createElement(AdminDashboard, {
+    onResetLastOrder: () => setLastOrder(null),
+    t: t,
+    lang: lang
+  })), tab === "admin" && /*#__PURE__*/React.createElement(AdminDashboard, {
     orders: orders,
     config: cfg,
     onUpdateStatus: (id, st) => setOrders(prev => prev.map(o => o.id === id ? {
@@ -1058,18 +1579,26 @@ function MainApp() {
     onDeleteOrder: id => setOrders(prev => prev.filter(o => o.id !== id)),
     onAddSampleOrder: handleAddSampleOrder,
     onResetOrders: () => {
-      if (confirm("Скинути базу замовлень до початкових демо-записів?")) {
+      if (confirm(t.resetConfirm)) {
         localStorage.removeItem("businesskit_orders");
         window.location.reload();
       }
-    }
+    },
+    t: t
+  }), tab === "creator" && /*#__PURE__*/React.createElement(CreatorStudio, {
+    config: cfg,
+    onSaveConfig: handleSaveConfig,
+    onResetToDefault: handleResetToDefault,
+    t: t,
+    lang: lang
   })), /*#__PURE__*/React.createElement(TelegramAlert, {
     order: telegramNotif,
     onClose: () => setTelegramNotif(null),
     onOpenAdmin: () => {
       setTab("admin");
       setTelegramNotif(null);
-    }
+    },
+    t: t
   }), /*#__PURE__*/React.createElement(WhiteLabelDemo, {
     currentConfig: cfg,
     isOpen: wlOpen,
@@ -1078,7 +1607,8 @@ function MainApp() {
     onCustomUpdate: custom => setCfg(prev => ({
       ...prev,
       ...custom
-    }))
+    })),
+    t: t
   }));
 }
 
